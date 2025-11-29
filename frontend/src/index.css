@@ -1,1 +1,30 @@
 @import "tailwindcss";
+/* Shared glass / radar styles */
+/* Make auth inputs readable on dark card */
+.glass-card input {
+  background-color: rgba(15, 23, 42, 0.98);
+  border-color: rgba(148, 163, 184, 0.9);
+  color: #e5f9ff;
+}
+
+.glass-card input::placeholder {
+  color: rgba(148, 163, 184, 0.9);
+}
+
+/* Make primary buttons pop */
+.glass-card button[type="submit"],
+.glass-card .btn-primary {
+  background: linear-gradient(to right, #4f46e5, #6366f1);
+  color: white;
+  font-weight: 600;
+}
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

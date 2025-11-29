@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { vehicleApi } from "../../api/vehicleApi";
 
+const COUNTRY_OPTIONS = [
+  "India",
+  "United States",
+  "Russia",
+  "China",
+  "France",
+  "United Kingdom",
+  "Germany",
+  "Israel",
+  "Japan",
+  "Other",
+];
+
 const VehicleForm = ({ vehicle, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -56,7 +69,6 @@ const VehicleForm = ({ vehicle, onSave, onCancel }) => {
     setError("");
 
     try {
-      // Convert string numbers to actual numbers
       const submitData = {
         ...formData,
         specifications: {
@@ -71,10 +83,8 @@ const VehicleForm = ({ vehicle, onSave, onCancel }) => {
       };
 
       if (vehicle) {
-        // Update existing vehicle
         await vehicleApi.update(vehicle._id, submitData);
       } else {
-        // Create new vehicle
         await vehicleApi.create(submitData);
       }
 
@@ -87,23 +97,37 @@ const VehicleForm = ({ vehicle, onSave, onCancel }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold mb-4">
-            {vehicle ? "Edit Vehicle" : "Add New Vehicle"}
-          </h2>
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+      <div className="glass-card bg-slate-950/95 max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-emerald-500/30">
+        <div className="px-6 pt-6 pb-4 border-b border-emerald-500/20 flex items-center justify-between">
+          <div>
+            <p className="section-label text-emerald-300/90">
+              {vehicle ? "Edit Asset" : "New Asset"}
+            </p>
+            <h2 className="text-2xl font-bold text-lime-200">
+              {vehicle ? "Update Vehicle Profile" : "Add New Vehicle"}
+            </h2>
+          </div>
+          <button
+            onClick={onCancel}
+            className="text-emerald-200 hover:text-emerald-100 text-sm"
+          >
+            ✕ Close
+          </button>
+        </div>
 
+        <div className="p-6 space-y-4">
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div className="border border-red-500/70 bg-red-950/60 text-red-100 px-4 py-3 rounded">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Top grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-xs font-semibold text-emerald-200 uppercase tracking-wide">
                   Name *
                 </label>
                 <input
@@ -112,12 +136,12 @@ const VehicleForm = ({ vehicle, onSave, onCancel }) => {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/80 px-3 py-2 text-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-xs font-semibold text-emerald-200 uppercase tracking-wide">
                   Type *
                 </label>
                 <select
@@ -125,7 +149,7 @@ const VehicleForm = ({ vehicle, onSave, onCancel }) => {
                   value={formData.type}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/80 px-3 py-2 text-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
                 >
                   <option value="tank">Tank</option>
                   <option value="truck">Truck</option>
@@ -136,7 +160,7 @@ const VehicleForm = ({ vehicle, onSave, onCancel }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-xs font-semibold text-emerald-200 uppercase tracking-wide">
                   Category *
                 </label>
                 <select
@@ -144,7 +168,7 @@ const VehicleForm = ({ vehicle, onSave, onCancel }) => {
                   value={formData.category}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/80 px-3 py-2 text-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
                 >
                   <option value="ground">Ground</option>
                   <option value="naval">Naval</option>
@@ -153,22 +177,31 @@ const VehicleForm = ({ vehicle, onSave, onCancel }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-xs font-semibold text-emerald-200 uppercase tracking-wide">
                   Country *
                 </label>
-                <input
-                  type="text"
+                <select
                   name="country"
                   value={formData.country}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                />
+                  className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/80 px-3 py-2 text-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
+                >
+                  <option value="" disabled>
+                    Select country
+                  </option>
+                  {COUNTRY_OPTIONS.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
+            {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-xs font-semibold text-emerald-200 uppercase tracking-wide">
                 Description *
               </label>
               <textarea
@@ -176,16 +209,19 @@ const VehicleForm = ({ vehicle, onSave, onCancel }) => {
                 value={formData.description}
                 onChange={handleChange}
                 required
-                rows="3"
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                rows={3}
+                className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/80 px-3 py-2 text-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
               />
             </div>
 
-            <div className="border-t pt-4">
-              <h3 className="text-lg font-medium mb-3">Specifications</h3>
+            {/* Specifications */}
+            <div className="border-t border-emerald-500/20 pt-4">
+              <h3 className="text-sm font-semibold text-emerald-200 mb-3">
+                Specifications
+              </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-xs font-semibold text-emerald-200 uppercase tracking-wide">
                     Weight
                   </label>
                   <input
@@ -193,11 +229,11 @@ const VehicleForm = ({ vehicle, onSave, onCancel }) => {
                     name="specs.weight"
                     value={formData.specifications.weight}
                     onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/80 px-3 py-2 text-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-xs font-semibold text-emerald-200 uppercase tracking-wide">
                     Crew
                   </label>
                   <input
@@ -205,11 +241,11 @@ const VehicleForm = ({ vehicle, onSave, onCancel }) => {
                     name="specs.crew"
                     value={formData.specifications.crew}
                     onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/80 px-3 py-2 text-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-xs font-semibold text-emerald-200 uppercase tracking-wide">
                     Speed
                   </label>
                   <input
@@ -217,11 +253,11 @@ const VehicleForm = ({ vehicle, onSave, onCancel }) => {
                     name="specs.speed"
                     value={formData.specifications.speed}
                     onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/80 px-3 py-2 text-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-xs font-semibold text-emerald-200 uppercase tracking-wide">
                     Range
                   </label>
                   <input
@@ -229,37 +265,39 @@ const VehicleForm = ({ vehicle, onSave, onCancel }) => {
                     name="specs.range"
                     value={formData.specifications.range}
                     onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/80 px-3 py-2 text-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
                   />
                 </div>
               </div>
             </div>
 
+            {/* Status */}
             <div className="flex items-center">
               <input
                 type="checkbox"
                 name="inService"
                 checked={formData.inService}
                 onChange={handleChange}
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                className="h-4 w-4 text-emerald-500 focus:ring-emerald-500 border-emerald-500/60 rounded bg-slate-900"
               />
-              <label className="ml-2 block text-sm text-gray-900">
+              <label className="ml-2 block text-sm text-emerald-100">
                 Currently in Service
               </label>
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4">
+            {/* Actions */}
+            <div className="flex justify-end space-x-3 pt-2">
               <button
                 type="button"
                 onClick={onCancel}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 rounded-md text-sm font-medium text-emerald-100 bg-slate-900/80 border border-emerald-500/30 hover:bg-slate-900"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                className="px-4 py-2 rounded-md text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-[0_0_20px_rgba(79,70,229,0.8)] disabled:opacity-60"
               >
                 {loading ? "Saving..." : vehicle ? "Update" : "Create"}
               </button>

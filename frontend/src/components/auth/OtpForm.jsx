@@ -24,7 +24,6 @@ const OtpForm = () => {
       });
 
       if (response.success) {
-        // Login successful
         login(response.data.admin, response.data.token);
         localStorage.removeItem("tempEmail");
         navigate("/dashboard");
@@ -37,14 +36,13 @@ const OtpForm = () => {
   };
 
   const handleResendOtp = async () => {
-    // For now, just show message. You can implement resend logic later.
     alert("Please use the same OTP or check your phone for new OTP");
   };
 
   return (
-    <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+    <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <div className="border border-red-500/70 bg-red-950/60 text-red-100 px-4 py-3 rounded">
           {error}
         </div>
       )}
@@ -52,7 +50,7 @@ const OtpForm = () => {
       <div>
         <label
           htmlFor="otp"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-xs font-semibold text-emerald-200 uppercase tracking-wide"
         >
           OTP Code
         </label>
@@ -61,19 +59,19 @@ const OtpForm = () => {
           name="otp"
           type="text"
           required
-          maxLength="6"
-          className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          maxLength={6}
+          className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/85 px-3 py-2 text-emerald-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
           placeholder="Enter 6-digit OTP"
           value={otp}
           onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
         />
       </div>
 
-      <div className="flex flex-col space-y-4">
+      <div className="flex flex-col space-y-3">
         <button
           type="submit"
           disabled={loading || otp.length !== 6}
-          className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          className="w-full flex justify-center py-2.5 px-4 text-sm font-semibold rounded-md text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-slate-900 shadow-[0_0_22px_rgba(79,70,229,0.9)] disabled:opacity-60"
         >
           {loading ? "Verifying..." : "Verify OTP"}
         </button>
@@ -81,7 +79,7 @@ const OtpForm = () => {
         <button
           type="button"
           onClick={handleResendOtp}
-          className="text-sm text-indigo-600 hover:text-indigo-500"
+          className="text-xs text-emerald-300 hover:text-emerald-100 text-center"
         >
           Resend OTP
         </button>

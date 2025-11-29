@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import VehicleList from "../components/vehicles/VehicleList";
 import VehicleForm from "../components/vehicles/VehicleForm";
@@ -6,10 +7,14 @@ import { vehicleApi } from "../api/vehicleApi";
 
 const AdminDashboard = () => {
   const { admin } = useAuth();
+  const navigate = useNavigate();
+
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState(null);
+
+  const handleBack = () => navigate(-1);
 
   useEffect(() => {
     fetchVehicles();
@@ -59,30 +64,61 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+    <div className="space-y-6">
+      {/* Purple back button */}
+      <button
+        type="button"
+        onClick={handleBack}
+        className="inline-flex items-center gap-1 rounded-full border border-purple-400/80 bg-purple-700/70 px-4 py-1.5 text-xs font-semibold text-purple-50 shadow-[0_0_20px_rgba(147,51,234,0.9)] hover:bg-purple-500 hover:border-purple-300 hover:shadow-[0_0_26px_rgba(167,139,250,1)] transition"
+      >
+        ← Back
+      </button>
+
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <p className="section-label">Command Center</p>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-lime-200 drop-shadow-[0_0_25px_rgba(190,242,100,0.8)]">
+            Admin Ops Console
+          </h1>
+          <p className="mt-2 text-sm text-emerald-200/80">
+            Manage military vehicle registry and readiness status.
+          </p>
+        </div>
+
         <button
           onClick={handleCreateVehicle}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+          className="px-5 py-2 rounded-full bg-emerald-500/25 text-emerald-100 border border-emerald-400/70 shadow-[0_0_20px_rgba(16,185,129,0.9)] hover:bg-emerald-500/40 transition"
         >
-          Add Vehicle
+          + Register Vehicle
         </button>
       </div>
 
-      <div className="bg-white shadow rounded-lg p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Welcome, {admin?.name}!</h2>
-        <p className="text-gray-600">
-          Manage military vehicles and view system information.
+      <div className="glass-card p-6">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <p className="section-label">Operator</p>
+            <h2 className="text-xl font-semibold text-emerald-100">
+              Welcome, {admin?.name}
+            </h2>
+          </div>
+          <span className="pill">
+            <span className="status-dot" />
+            Admin Channel
+          </span>
+        </div>
+        <p className="text-sm text-emerald-100/80">
+          Authorized to add, update, and retire military vehicle records.
         </p>
       </div>
 
       {showForm && (
-        <VehicleForm
-          vehicle={editingVehicle}
-          onSave={handleVehicleSaved}
-          onCancel={handleFormClose}
-        />
+        <div className="glass-card p-6">
+          <VehicleForm
+            vehicle={editingVehicle}
+            onSave={handleVehicleSaved}
+            onCancel={handleFormClose}
+          />
+        </div>
       )}
 
       <VehicleList

@@ -11,15 +11,22 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Military Intelligence
+    <div className="flex items-center justify-center py-16">
+      <div className="glass-card max-w-md w-full p-8 space-y-6 bg-slate-950/95">
+        <div className="text-center">
+          <p className="section-label text-emerald-300/90">Secure Access</p>
+          <h2 className="mt-2 text-3xl font-extrabold text-lime-300 drop-shadow-[0_0_20px_rgba(190,242,100,0.9)]">
+            Military Intelligence Node
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">Admin Login</p>
+          <p className="mt-3 text-sm text-emerald-100">
+            Admin login with two-step verification.
+          </p>
         </div>
-        <LoginForm />
+
+        {/* Login form */}
+        <div className="space-y-4">
+          <LoginForm />
+        </div>
       </div>
     </div>
   );

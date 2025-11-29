@@ -27,7 +27,6 @@ const LoginForm = () => {
       const response = await authApi.login(formData);
 
       if (response.success) {
-        // Store temp email for OTP verification
         localStorage.setItem("tempEmail", formData.email);
         navigate("/otp");
       }
@@ -39,16 +38,19 @@ const LoginForm = () => {
   };
 
   return (
-    <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+    <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <div className="border border-red-500/70 bg-red-950/60 text-red-100 px-4 py-3 rounded">
           {error}
         </div>
       )}
 
-      <div className="rounded-md shadow-sm -space-y-px">
+      <div className="space-y-4">
         <div>
-          <label htmlFor="email" className="sr-only">
+          <label
+            htmlFor="email"
+            className="block text-xs font-semibold text-emerald-200 uppercase tracking-wide"
+          >
             Email
           </label>
           <input
@@ -56,14 +58,18 @@ const LoginForm = () => {
             name="email"
             type="text"
             required
-            className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-            placeholder="Email address"
+            className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/85 px-3 py-2 text-emerald-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
+            placeholder="admin@military.net"
             value={formData.email}
             onChange={handleChange}
           />
         </div>
+
         <div>
-          <label htmlFor="password" className="sr-only">
+          <label
+            htmlFor="password"
+            className="block text-xs font-semibold text-emerald-200 uppercase tracking-wide"
+          >
             Password
           </label>
           <input
@@ -71,8 +77,8 @@ const LoginForm = () => {
             name="password"
             type="password"
             required
-            className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-            placeholder="Password"
+            className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/85 px-3 py-2 text-emerald-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
+            placeholder="••••••••"
             value={formData.password}
             onChange={handleChange}
           />
@@ -83,7 +89,7 @@ const LoginForm = () => {
         <button
           type="submit"
           disabled={loading}
-          className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          className="group relative w-full flex justify-center py-2.5 px-4 text-sm font-semibold rounded-md text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-slate-900 shadow-[0_0_22px_rgba(79,70,229,0.9)] disabled:opacity-60"
         >
           {loading ? "Logging in..." : "Login"}
         </button>

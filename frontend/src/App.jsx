@@ -10,14 +10,17 @@ import LoginPage from "./pages/LoginPage";
 import OtpPage from "./pages/OtpPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import PublicNewsPage from "./pages/PublicNewsPage";
-import Navbar from "./components/Layout/Navbar";
+import VehicleDetailsPage from "./pages/VehicleDetailsPage";
+import AppLayout from "./components/layout/AppLayout";
 
 const ProtectedRoute = ({ children }) => {
   const { admin, loading } = useAuth();
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">Loading...</div>
+      <div className="flex justify-center items-center h-64 text-emerald-100">
+        Loading...
+      </div>
     );
   }
 
@@ -28,8 +31,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-gray-100">
-          <Navbar />
+        <AppLayout>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/otp" element={<OtpPage />} />
@@ -42,9 +44,10 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/vehicles/:id" element={<VehicleDetailsPage />} />
             <Route path="/" element={<Navigate to="/news" />} />
           </Routes>
-        </div>
+        </AppLayout>
       </Router>
     </AuthProvider>
   );
