@@ -10,7 +10,8 @@ const OtpForm = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const tempEmail = localStorage.getItem("tempEmail");
+  // this can still be called tempEmail, but value is actually identifier
+  const identifier = localStorage.getItem("tempEmail");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,8 +20,8 @@ const OtpForm = () => {
 
     try {
       const response = await authApi.verifyOtp({
-        email: tempEmail,
-        otp: otp,
+        identifier, // <- IMPORTANT: matches backend validator + controller
+        otp,
       });
 
       if (response.success) {

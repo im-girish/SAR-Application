@@ -29,7 +29,7 @@ const VehicleDetailsPage = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-400"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-400" />
       </div>
     );
   }
@@ -41,10 +41,10 @@ const VehicleDetailsPage = () => {
           {error || "Vehicle not found"}
         </div>
         <Link
-          to="/news"
+          to="/vehicles"
           className="text-emerald-300 hover:text-emerald-100 text-sm"
         >
-          ← Back to News
+          ← Back to Vehicles
         </Link>
       </div>
     );
@@ -53,10 +53,10 @@ const VehicleDetailsPage = () => {
   return (
     <div className="space-y-4">
       <Link
-        to="/news"
+        to="/vehicles"
         className="text-emerald-300 hover:text-emerald-100 text-sm"
       >
-        ← Back to News
+        ← Back to Vehicles
       </Link>
 
       <div className="glass-card p-6">
@@ -95,25 +95,25 @@ const VehicleDetailsPage = () => {
               Specifications
             </h2>
             <div className="space-y-3 text-sm text-emerald-100/80">
-              {vehicle.specifications.weight && (
+              {vehicle.specifications?.weight && (
                 <div className="flex justify-between border-b border-emerald-500/20 pb-2">
                   <span className="font-medium">Weight:</span>
                   <span>{vehicle.specifications.weight}</span>
                 </div>
               )}
-              {vehicle.specifications.crew && (
+              {vehicle.specifications?.crew && (
                 <div className="flex justify-between border-b border-emerald-500/20 pb-2">
                   <span className="font-medium">Crew:</span>
                   <span>{vehicle.specifications.crew} personnel</span>
                 </div>
               )}
-              {vehicle.specifications.speed && (
+              {vehicle.specifications?.speed && (
                 <div className="flex justify-between border-b border-emerald-500/20 pb-2">
                   <span className="font-medium">Speed:</span>
                   <span>{vehicle.specifications.speed}</span>
                 </div>
               )}
-              {vehicle.specifications.range && (
+              {vehicle.specifications?.range && (
                 <div className="flex justify-between border-b border-emerald-500/20 pb-2">
                   <span className="font-medium">Range:</span>
                   <span>{vehicle.specifications.range}</span>
@@ -145,7 +145,7 @@ const VehicleDetailsPage = () => {
               </div>
             </div>
 
-            {vehicle.specifications.armament &&
+            {vehicle.specifications?.armament &&
               vehicle.specifications.armament.length > 0 && (
                 <div className="mt-6">
                   <h3 className="font-semibold text-emerald-50 mb-2">

@@ -4,7 +4,7 @@ import { authApi } from "../../api/authApi";
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({
-    email: "",
+    identifier: "",
     password: "",
   });
   const [loading, setLoading] = useState(false);
@@ -27,11 +27,11 @@ const LoginForm = () => {
       const response = await authApi.login(formData);
 
       if (response.success) {
-        localStorage.setItem("tempEmail", formData.email);
+        localStorage.setItem("tempEmail", formData.identifier);
         navigate("/otp");
       }
-    } catch (error) {
-      setError(error.response?.data?.message || "Login failed");
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -48,19 +48,19 @@ const LoginForm = () => {
       <div className="space-y-4">
         <div>
           <label
-            htmlFor="email"
+            htmlFor="identifier"
             className="block text-xs font-semibold text-emerald-200 uppercase tracking-wide"
           >
-            Email
+            Email or Username
           </label>
           <input
-            id="email"
-            name="email"
+            id="identifier"
+            name="identifier"
             type="text"
             required
             className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/85 px-3 py-2 text-emerald-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
-            placeholder="admin@military.net"
-            value={formData.email}
+            placeholder="admin@military.net or admin01"
+            value={formData.identifier}
             onChange={handleChange}
           />
         </div>

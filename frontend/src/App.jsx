@@ -1,3 +1,4 @@
+// D:\SAR-APP\frontend\src\App.jsx
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -11,6 +12,7 @@ import OtpPage from "./pages/OtpPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import PublicNewsPage from "./pages/PublicNewsPage";
 import VehicleDetailsPage from "./pages/VehicleDetailsPage";
+import VehiclesPage from "./pages/VehiclesPage";
 import AppLayout from "./components/layout/AppLayout";
 
 const ProtectedRoute = ({ children }) => {
@@ -24,7 +26,7 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  return admin ? children : <Navigate to="/login" />;
+  return admin ? children : <Navigate to="/login" replace />;
 };
 
 function App() {
@@ -33,9 +35,32 @@ function App() {
       <Router>
         <AppLayout>
           <Routes>
+            {/* Auth */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/otp" element={<OtpPage />} />
-            <Route path="/news" element={<PublicNewsPage />} />
+
+            {/* Public: Command Center (news) */}
+            <Route path="/" element={<PublicNewsPage />} />
+
+            {/* Protected: vehicles list + details */}
+            <Route
+              path="/vehicles"
+              element={
+                <ProtectedRoute>
+                  <VehiclesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/vehicles/:id"
+              element={
+                <ProtectedRoute>
+                  <VehicleDetailsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected: admin dashboard */}
             <Route
               path="/dashboard"
               element={
@@ -44,8 +69,9 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/vehicles/:id" element={<VehicleDetailsPage />} />
-            <Route path="/" element={<Navigate to="/news" />} />
+
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AppLayout>
       </Router>

@@ -9,10 +9,30 @@ const tempTokenStore = new Map();
 
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { identifier, password } = req.body; // email or username
 
-    // Find admin by email
-    const admin = await Admin.findOne({ email });
+    if (!identifier || !password) {
+      return errorResponse(
+        res,
+        "Identifier (email or username) and password are required",
+        400
+      );
+    }
+
+    const normalizedIdentifier = identifier.trim();
+
+    // Find admin by email OR username (case-insensitive for username)
+    const admin = await Admin.findOne({
+      $or: [
+        { email: normalizedIdentifier.toLowerCase() },
+        { username: normalizedIdentifier },
+        { username: new RegExp(`^${normalizedIdentifier}$`, "i") },
+      ],
+    });
+
+    console.log("LOGIN IDENTIFIER:", normalizedIdentifier);
+    console.log("FOUND ADMIN:", admin);
+
     if (!admin) {
       return errorResponse(res, "Invalid credentials", 401);
     }
@@ -30,7 +50,7 @@ export const login = async (req, res) => {
       step: "otp_required",
     });
 
-    // Store temp token with admin data
+    // Store temp data keyed by email
     tempTokenStore.set(admin.email, {
       adminId: admin._id,
       phone: admin.phone,
@@ -54,10 +74,28 @@ export const login = async (req, res) => {
 
 export const verifyOtpAndLogin = async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { identifier, otp } = req.body; // identifier used again
 
-    // Get admin data from temp store
-    const tempData = tempTokenStore.get(email);
+    if (!identifier || !otp) {
+      return errorResponse(res, "Identifier and OTP are required", 400);
+    }
+
+    const normalizedIdentifier = identifier.trim();
+
+    // Look up by email OR username again
+    const adminRecord = await Admin.findOne({
+      $or: [
+        { email: normalizedIdentifier.toLowerCase() },
+        { username: normalizedIdentifier },
+        { username: new RegExp(`^${normalizedIdentifier}$`, "i") },
+      ],
+    });
+
+    if (!adminRecord) {
+      return errorResponse(res, "Session expired. Please login again.", 400);
+    }
+
+    const tempData = tempTokenStore.get(adminRecord.email);
     if (!tempData) {
       return errorResponse(res, "Session expired. Please login again.", 400);
     }
@@ -79,7 +117,7 @@ export const verifyOtpAndLogin = async (req, res) => {
     });
 
     // Clear temp data
-    tempTokenStore.delete(email);
+    tempTokenStore.delete(admin.email);
 
     return successResponse(
       res,

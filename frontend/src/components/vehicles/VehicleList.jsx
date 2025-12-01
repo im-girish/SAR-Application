@@ -8,7 +8,13 @@ const LIMIT_OPTIONS = [
   { value: "all", label: "All" },
 ];
 
-const VehicleList = ({ vehicles, loading, onEdit, onDelete }) => {
+const VehicleList = ({
+  vehicles,
+  loading,
+  onEdit,
+  onDelete,
+  readOnly = false,
+}) => {
   const [countryQuery, setCountryQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [limitMode, setLimitMode] = useState("top10");
@@ -61,7 +67,7 @@ const VehicleList = ({ vehicles, loading, onEdit, onDelete }) => {
 
   return (
     <div className="space-y-5">
-      {/* Top row */}
+      {/* Top row: heading + controls */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <p className="section-label">Arsenal Overview</p>
@@ -145,18 +151,18 @@ const VehicleList = ({ vehicles, loading, onEdit, onDelete }) => {
           {Object.entries(grouped).map(([category, list]) => (
             <div
               key={category}
-              className="glass-card bg-slate-950/90 p-5 border border-emerald-500/40"
+              className="rounded-3xl border border-emerald-500/40 bg-slate-950/90 p-5 shadow-[0_18px_40px_rgba(0,0,0,0.85)]"
             >
               <div className="flex flex-wrap justify-between items-center mb-3 gap-3">
                 <div>
-                  <h4 className="text-lg font-bold text-lime-200">
+                  <h4 className="text-lg md:text-xl font-extrabold text-lime-200">
                     {category === "ground"
                       ? "Ground Forces"
                       : category === "air"
                       ? "Air Assets"
                       : category === "naval"
-                      ? "Naval Fleet"
-                      : "Other Assets"}
+                      ? "Artillery & AD"
+                      : "Logistics & Support"}
                   </h4>
                   <p className="text-xs text-emerald-200/80">
                     {list.length} unit{list.length > 1 ? "s" : ""} in view
@@ -181,9 +187,11 @@ const VehicleList = ({ vehicles, loading, onEdit, onDelete }) => {
                       <th className="px-4 py-2 text-left font-semibold text-emerald-300 uppercase tracking-wide">
                         Notes
                       </th>
-                      <th className="px-4 py-2 text-left font-semibold text-emerald-300 uppercase tracking-wide">
-                        Actions
-                      </th>
+                      {!readOnly && (
+                        <th className="px-4 py-2 text-left font-semibold text-emerald-300 uppercase tracking-wide">
+                          Actions
+                        </th>
+                      )}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-emerald-500/20">
@@ -208,20 +216,23 @@ const VehicleList = ({ vehicles, loading, onEdit, onDelete }) => {
                             v.description?.slice(0, 80) ||
                             "—"}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">
-                          <button
-                            onClick={() => onEdit(v)}
-                            className="mr-3 rounded-full bg-indigo-600/80 px-3 py-1 text-[0.7rem] font-semibold text-white border border-indigo-300 shadow-[0_0_14px_rgba(79,70,229,0.9)] hover:bg-indigo-400 hover:border-indigo-200 transition"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => onDelete(v._id)}
-                            className="rounded-full bg-red-600/80 px-3 py-1 text-[0.7rem] font-semibold text-white border border-red-300 shadow-[0_0_14px_rgba(248,113,113,0.9)] hover:bg-red-500 hover:border-red-200 transition"
-                          >
-                            Delete
-                          </button>
-                        </td>
+
+                        {!readOnly && (
+                          <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">
+                            <button
+                              onClick={() => onEdit && onEdit(v)}
+                              className="mr-3 rounded-full bg-indigo-600/80 px-3 py-1 text-[0.7rem] font-semibold text-white border border-indigo-300 shadow-[0_0_14px_rgba(79,70,229,0.9)] hover:bg-indigo-400 hover:border-indigo-200 transition"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => onDelete && onDelete(v._id)}
+                              className="rounded-full bg-red-600/80 px-3 py-1 text-[0.7rem] font-semibold text-white border border-red-300 shadow-[0_0_14px_rgba(248,113,113,0.9)] hover:bg-red-500 hover:border-red-200 transition"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>

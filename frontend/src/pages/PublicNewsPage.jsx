@@ -1,4 +1,3 @@
-// D:\SAR-APP\frontend\src\pages\PublicNewsPage.jsx
 import React, { useState, useEffect } from "react";
 import { newsApi } from "../api/newsApi";
 
@@ -45,8 +44,8 @@ const PublicNewsPage = () => {
       });
 
       setNews(filteredNews);
-    } catch (error) {
-      console.error("Error fetching news:", error);
+    } catch (err) {
+      console.error("Error fetching news:", err);
       setError("Failed to load military news from API");
       setNews([]);
     } finally {
@@ -57,7 +56,7 @@ const PublicNewsPage = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-400"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-400" />
       </div>
     );
   }
@@ -69,9 +68,9 @@ const PublicNewsPage = () => {
         <h1 className="text-4xl font-extrabold text-lime-200">
           Military & Defense News
         </h1>
-        <p className="mt-2 text-sm text-emerald-100/80">
+        <p className="mt-2 text-sm text-emerald-100/80 max-w-2xl">
           Latest updates on military operations, defence technology and armed
-          forces.
+          forces worldwide.
         </p>
       </div>
 
@@ -81,7 +80,10 @@ const PublicNewsPage = () => {
         </div>
       )}
 
-      <div className="glass-card p-6">
+      <div
+        className="glass-card p-6 translate-y-3 opacity-0"
+        style={{ animation: "slideInUp 0.7s ease-out forwards" }}
+      >
         {news.length === 0 ? (
           <div className="text-center py-8 text-emerald-100/80">
             <p>No military news available at the moment.</p>
@@ -92,40 +94,42 @@ const PublicNewsPage = () => {
             </p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-5">
             {news.map((item, index) => (
-              <div
+              <article
                 key={index}
-                className="border-b border-emerald-500/20 pb-5 last:border-b-0 last:pb-0"
+                className="rounded-2xl border border-emerald-500/40 bg-slate-950/85 px-5 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.85)]"
               >
-                <div className="flex items-start gap-4">
+                <div className="flex gap-4">
                   <div className="mt-2 h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(74,222,128,0.9)]" />
                   <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-emerald-50 mb-1">
+                    <h3 className="text-lg md:text-xl font-semibold text-emerald-50 mb-1">
                       {item.title}
                     </h3>
                     <p className="text-sm text-emerald-100/80 mb-2">
                       {item.description}
                     </p>
                     <div className="flex flex-wrap justify-between items-center text-xs text-emerald-200/80 gap-2">
-                      <span className="pill">
-                        Source: {item.source || "Unknown"}
+                      <span>Source: {item.source || "Unknown"}</span>
+                      <span>
+                        {item.pubDate
+                          ? new Date(item.pubDate).toLocaleDateString()
+                          : ""}
                       </span>
-                      <span>{new Date(item.pubDate).toLocaleDateString()}</span>
                     </div>
                     {item.link && (
                       <a
                         href={item.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-emerald-300 hover:text-emerald-100 text-sm mt-2 inline-block"
+                        className="mt-3 inline-block text-sm text-emerald-300 hover:text-emerald-100"
                       >
                         Open full report →
                       </a>
                     )}
                   </div>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         )}
