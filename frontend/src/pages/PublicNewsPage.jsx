@@ -15,12 +15,11 @@ const PublicNewsPage = () => {
     setError("");
     try {
       const response = await newsApi.getMilitaryNews(); // GET /api/news
+      // console.log("NEWS RESPONSE", response.data);
 
-      // Backend should return { success, articles: [...] } or { results: [...] }
-      const rawArticles = Array.isArray(response.data?.articles)
-        ? response.data.articles
-        : Array.isArray(response.data?.results)
-        ? response.data.results
+      // Your backend shape: { success, message, data: { status, totalResults, results: [...] } }
+      const rawArticles = Array.isArray(response.data?.data?.results)
+        ? response.data.data.results
         : [];
 
       const militaryKeywords = [
