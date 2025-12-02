@@ -11,8 +11,17 @@ const PublicNewsPage = () => {
   }, []);
 
   const fetchNews = async () => {
+    setLoading(true);
+    setError("");
     try {
-      const response = await newsApi.getMilitaryNews();
+      const response = await newsApi.getMilitaryNews(); // GET /api/news
+
+      // Backend should return { success, articles: [...] } or { results: [...] }
+      const rawArticles = Array.isArray(response.data?.articles)
+        ? response.data.articles
+        : Array.isArray(response.data?.results)
+        ? response.data.results
+        : [];
 
       const militaryKeywords = [
         "military",
@@ -34,7 +43,7 @@ const PublicNewsPage = () => {
         "combat",
       ];
 
-      const filteredNews = response.data.results.filter((article) => {
+      const filteredNews = rawArticles.filter((article) => {
         const title = article.title?.toLowerCase() || "";
         const description = article.description?.toLowerCase() || "";
         const combinedText = `${title} ${description}`;
@@ -44,6 +53,9 @@ const PublicNewsPage = () => {
       });
 
       setNews(filteredNews);
+      if (!response.data?.success && filteredNews.length === 0) {
+        setError("Failed to load military news from API");
+      }
     } catch (err) {
       console.error("Error fetching news:", err);
       setError("Failed to load military news from API");

@@ -1,3 +1,4 @@
+// D:\SAR-APP\frontend\src\components\vehicles\VehicleForm.jsx
 import React, { useState, useEffect } from "react";
 import { vehicleApi } from "../../api/vehicleApi";
 
@@ -39,7 +40,27 @@ const VehicleForm = ({ vehicle, onSave, onCancel }) => {
 
   useEffect(() => {
     if (vehicle) {
-      setFormData(vehicle);
+      // ensure specs object exists when editing
+      setFormData({
+        ...vehicle,
+        specifications: {
+          weight: vehicle.specifications?.weight || "",
+          length: vehicle.specifications?.length || "",
+          width: vehicle.specifications?.width || "",
+          height: vehicle.specifications?.height || "",
+          crew:
+            vehicle.specifications?.crew !== undefined &&
+            vehicle.specifications?.crew !== null
+              ? String(vehicle.specifications.crew)
+              : "",
+          speed: vehicle.specifications?.speed || "",
+          range: vehicle.specifications?.range || "",
+          armament: vehicle.specifications?.armament || [],
+        },
+        yearIntroduced: vehicle.yearIntroduced
+          ? String(vehicle.yearIntroduced)
+          : "",
+      });
     }
   }, [vehicle]);
 
@@ -69,16 +90,31 @@ const VehicleForm = ({ vehicle, onSave, onCancel }) => {
     setError("");
 
     try {
+      // Build specifications without empty values
+      const specs = {};
+      const s = formData.specifications;
+
+      if (s.weight) specs.weight = s.weight;
+      if (s.length) specs.length = s.length;
+      if (s.width) specs.width = s.width;
+      if (s.height) specs.height = s.height;
+      if (s.crew !== "" && s.crew != null) specs.crew = parseInt(s.crew, 10);
+      if (s.speed) specs.speed = s.speed;
+      if (s.range) specs.range = s.range;
+      if (Array.isArray(s.armament) && s.armament.length > 0) {
+        specs.armament = s.armament;
+      }
+
       const submitData = {
-        ...formData,
-        specifications: {
-          ...formData.specifications,
-          crew: formData.specifications.crew
-            ? parseInt(formData.specifications.crew)
-            : undefined,
-        },
+        name: formData.name.trim(),
+        type: formData.type, // from select: tank/truck/ship/aircraft/other
+        category: formData.category, // ground/naval/air
+        country: formData.country.trim(),
+        description: formData.description.trim(),
+        specifications: specs,
+        inService: formData.inService,
         yearIntroduced: formData.yearIntroduced
-          ? parseInt(formData.yearIntroduced)
+          ? parseInt(formData.yearIntroduced, 10)
           : undefined,
       };
 
@@ -89,8 +125,14 @@ const VehicleForm = ({ vehicle, onSave, onCancel }) => {
       }
 
       onSave();
-    } catch (error) {
-      setError(error.response?.data?.message || "Failed to save vehicle");
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          (Array.isArray(err.response?.data?.errors)
+            ? err.response.data.errors.join(", ")
+            : "Failed to save vehicle")
+      );
+      console.error("API error:", err.response?.data || err);
     } finally {
       setLoading(false);
     }

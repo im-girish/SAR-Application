@@ -59,7 +59,7 @@ const LoginForm = () => {
             type="text"
             required
             className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/85 px-3 py-2 text-emerald-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
-            placeholder="admin@military.net or admin01"
+            placeholder="Email Or Username"
             value={formData.identifier}
             onChange={handleChange}
           />

@@ -16,15 +16,20 @@ axiosClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Handle responses
 axiosClient.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    // keep full axios response, vehicleApi will use response.data
+    return response;
+  },
   (error) => {
+    // optionally log server message
+    if (error.response) {
+      console.error("API error:", error.response.status, error.response.data);
+    }
     return Promise.reject(error);
   }
 );

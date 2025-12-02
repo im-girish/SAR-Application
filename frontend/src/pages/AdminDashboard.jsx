@@ -1,3 +1,4 @@
+// D:\SAR-APP\frontend\src\pages\AdminDashboard.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -23,9 +24,12 @@ const AdminDashboard = () => {
   const fetchVehicles = async () => {
     try {
       const response = await vehicleApi.getAll();
-      setVehicles(response.data);
+      // backend: { success: true, data: [...] }
+      const list = Array.isArray(response.data?.data) ? response.data.data : [];
+      setVehicles(list);
     } catch (error) {
       console.error("Error fetching vehicles:", error);
+      setVehicles([]);
     } finally {
       setLoading(false);
     }
@@ -63,6 +67,10 @@ const AdminDashboard = () => {
     }
   };
 
+  const goToVehiclesPage = () => {
+    navigate("/vehicles");
+  };
+
   return (
     <div className="space-y-6">
       {/* Purple back button */}
@@ -78,19 +86,30 @@ const AdminDashboard = () => {
         <div>
           <p className="section-label">Command Center</p>
           <h1 className="text-4xl md:text-5xl font-extrabold text-lime-200 drop-shadow-[0_0_25px_rgba(190,242,100,0.8)]">
-            Admin Ops Console
+            Admin Operational Console
           </h1>
           <p className="mt-2 text-sm text-emerald-200/80">
             Manage military vehicle registry and readiness status.
           </p>
         </div>
 
-        <button
-          onClick={handleCreateVehicle}
-          className="px-5 py-2 rounded-full bg-emerald-500/25 text-emerald-100 border border-emerald-400/70 shadow-[0_0_20px_rgba(16,185,129,0.9)] hover:bg-emerald-500/40 transition"
-        >
-          + Register Vehicle
-        </button>
+        <div className="flex flex-col items-end gap-3">
+          {/* Show Vehicle Details button */}
+          <button
+            onClick={goToVehiclesPage}
+            className="px-5 py-2 rounded-full bg-emerald-500/20 text-emerald-100 border border-emerald-400/70 shadow-[0_0_18px_rgba(16,185,129,0.9)] hover:bg-emerald-500/35 transition text-sm font-semibold"
+          >
+            Show Vehicle Details →
+          </button>
+
+          {/* Blue Register Vehicle button */}
+          <button
+            onClick={handleCreateVehicle}
+            className="px-5 py-2 rounded-full bg-sky-600 text-white border border-sky-300 shadow-[0_0_18px_rgba(59,130,246,0.9)] hover:bg-sky-500 hover:border-sky-200 hover:shadow-[0_0_24px_rgba(96,165,250,1)] transition text-sm font-semibold"
+          >
+            + Register Vehicle
+          </button>
+        </div>
       </div>
 
       <div className="glass-card p-6">
@@ -98,7 +117,7 @@ const AdminDashboard = () => {
           <div>
             <p className="section-label">Operator</p>
             <h2 className="text-xl font-semibold text-emerald-100">
-              Welcome, {admin?.name}
+              Welcome, {admin?.username || admin?.name}
             </h2>
           </div>
           <span className="pill">

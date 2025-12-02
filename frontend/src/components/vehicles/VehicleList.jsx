@@ -211,10 +211,11 @@ const VehicleList = ({
                         <td className="px-4 py-3 whitespace-nowrap text-emerald-100/80">
                           {v.country}
                         </td>
+                        {/* Notes: now fully visible, wrapped */}
                         <td className="px-4 py-3 text-emerald-100/80">
-                          {v.specifications?.notes ||
-                            v.description?.slice(0, 80) ||
-                            "—"}
+                          <div className="whitespace-normal leading-snug">
+                            {v.specifications?.notes || v.description || "—"}
+                          </div>
                         </td>
 
                         {!readOnly && (

@@ -1,10 +1,12 @@
 // D:\SAR-APP\frontend\src\pages\VehicleDetailsPage.jsx
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { vehicleApi } from "../api/vehicleApi";
 
 const VehicleDetailsPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+
   const [vehicle, setVehicle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -17,13 +19,18 @@ const VehicleDetailsPage = () => {
   const fetchVehicle = async () => {
     try {
       const response = await vehicleApi.getById(id);
-      setVehicle(response.data);
+      // backend: { success: true, data: { ...vehicle } }
+      setVehicle(response.data?.data || null);
     } catch (error) {
       console.error("Error fetching vehicle:", error);
       setError("Vehicle not found");
     } finally {
       setLoading(false);
     }
+  };
+
+  const goToCommandCenter = () => {
+    navigate("/");
   };
 
   if (loading) {
@@ -40,6 +47,36 @@ const VehicleDetailsPage = () => {
         <div className="glass-card border border-red-500/60 text-red-200 px-4 py-3">
           {error || "Vehicle not found"}
         </div>
+
+        <div className="flex gap-4">
+          <button
+            type="button"
+            onClick={goToCommandCenter}
+            className="text-emerald-300 hover:text-emerald-100 text-sm"
+          >
+            ← Back to Command Center
+          </button>
+          <Link
+            to="/vehicles"
+            className="text-emerald-300 hover:text-emerald-100 text-sm"
+          >
+            ← Back to Vehicles
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-4">
+        <button
+          type="button"
+          onClick={goToCommandCenter}
+          className="text-emerald-300 hover:text-emerald-100 text-sm"
+        >
+          ← Back to Command Center
+        </button>
         <Link
           to="/vehicles"
           className="text-emerald-300 hover:text-emerald-100 text-sm"
@@ -47,17 +84,6 @@ const VehicleDetailsPage = () => {
           ← Back to Vehicles
         </Link>
       </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      <Link
-        to="/vehicles"
-        className="text-emerald-300 hover:text-emerald-100 text-sm"
-      >
-        ← Back to Vehicles
-      </Link>
 
       <div className="glass-card p-6">
         <h1 className="text-3xl font-bold text-lime-200 mb-3">
