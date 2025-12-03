@@ -24,13 +24,18 @@ const LoginForm = () => {
     setError("");
 
     try {
-      const response = await authApi.login(formData);
+      const response = await authApi.login(formData); // axios response
+      console.log("LOGIN RESPONSE", response.data);
 
-      if (response.success) {
+      // successResponse typically: { success: true, message, data: { tempToken, otpSent } }
+      if (response.data?.success) {
         localStorage.setItem("tempEmail", formData.identifier);
-        navigate("/otp");
+        navigate("/otp"); // make sure this route exists
+      } else {
+        setError(response.data?.message || "Login failed");
       }
     } catch (err) {
+      console.error("Login error:", err);
       setError(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);

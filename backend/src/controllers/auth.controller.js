@@ -1,12 +1,15 @@
+// D:\SAR-APP\backend\src\controllers\auth.controller.js
+
 import Admin from "../models/Admin.js";
 import { comparePassword } from "../services/auth.service.js";
 import { sendOtp, verifyOtp } from "../services/otp.service.js";
 import { generateToken } from "../utils/jwt.util.js";
 import { successResponse, errorResponse } from "../utils/response.util.js";
 
-// Store temporary tokens (in production, use Redis)
+// In production, replace with Redis or another store
 const tempTokenStore = new Map();
 
+// POST /api/auth/login
 export const login = async (req, res) => {
   try {
     const { identifier, password } = req.body; // email or username
@@ -31,7 +34,7 @@ export const login = async (req, res) => {
     });
 
     console.log("LOGIN IDENTIFIER:", normalizedIdentifier);
-    console.log("FOUND ADMIN:", admin);
+    console.log("FOUND ADMIN:", !!admin);
 
     if (!admin) {
       return errorResponse(res, "Invalid credentials", 401);
@@ -43,7 +46,7 @@ export const login = async (req, res) => {
       return errorResponse(res, "Invalid credentials", 401);
     }
 
-    // Generate temporary token for OTP step
+    // Generate temporary token for OTP step (optional for client)
     const tempToken = generateToken({
       id: admin._id,
       email: admin.email,
@@ -62,19 +65,25 @@ export const login = async (req, res) => {
       return errorResponse(res, "Failed to send OTP", 500);
     }
 
-    return successResponse(res, {
-      tempToken,
-      message: "OTP sent to your registered phone number",
-    });
+    // successResponse(res, data, message, statusCode?)
+    return successResponse(
+      res,
+      {
+        tempToken,
+        otpSent: true,
+      },
+      "OTP sent to your registered phone number"
+    );
   } catch (error) {
     console.error("Login error:", error);
     return errorResponse(res, "Login failed", 500);
   }
 };
 
+// POST /api/auth/verify-otp
 export const verifyOtpAndLogin = async (req, res) => {
   try {
-    const { identifier, otp } = req.body; // identifier used again
+    const { identifier, otp } = req.body;
 
     if (!identifier || !otp) {
       return errorResponse(res, "Identifier and OTP are required", 400);
@@ -100,13 +109,13 @@ export const verifyOtpAndLogin = async (req, res) => {
       return errorResponse(res, "Session expired. Please login again.", 400);
     }
 
-    // Verify OTP with Twilio
+    // Verify OTP with provider
     const otpResult = await verifyOtp(tempData.phone, otp);
     if (!otpResult.success) {
       return errorResponse(res, "Invalid OTP", 400);
     }
 
-    // Get admin data
+    // Get fresh admin data
     const admin = await Admin.findById(tempData.adminId);
 
     // Generate final access token

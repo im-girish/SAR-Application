@@ -20,16 +20,22 @@ const OtpForm = () => {
 
     try {
       const response = await authApi.verifyOtp({
-        identifier, // <- IMPORTANT: matches backend validator + controller
+        identifier,
         otp,
       });
+      console.log("OTP RESPONSE", response.data);
 
-      if (response.success) {
-        login(response.data.admin, response.data.token);
+      // expect successResponse: { success: true, data: { token, admin }, message }
+      if (response.data?.success) {
+        const { admin, token } = response.data.data || response.data; // handle both shapes
+        login(admin, token);
         localStorage.removeItem("tempEmail");
         navigate("/dashboard");
+      } else {
+        setError(response.data?.message || "OTP verification failed");
       }
     } catch (error) {
+      console.error("OTP verify error:", error);
       setError(error.response?.data?.message || "OTP verification failed");
     } finally {
       setLoading(false);
