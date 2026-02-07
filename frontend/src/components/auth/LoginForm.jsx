@@ -7,36 +7,52 @@ const LoginForm = () => {
     identifier: "",
     password: "",
   });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!formData.identifier || !formData.password) {
+      setError("Please fill all fields");
+      return;
+    }
+
     setLoading(true);
     setError("");
 
     try {
-      const response = await authApi.login(formData); // axios response
+      const response = await authApi.login(formData);
+
       console.log("LOGIN RESPONSE", response.data);
 
-      // successResponse typically: { success: true, message, data: { tempToken, otpSent } }
-      if (response.data?.success) {
+      if (response?.data?.success) {
+        // ✅ Save temp token (OTP flow)
+        if (response.data.data?.tempToken) {
+          localStorage.setItem("tempToken", response.data.data.tempToken);
+        }
+
+        // Optional identifier storage
         localStorage.setItem("tempEmail", formData.identifier);
-        navigate("/otp"); // make sure this route exists
+
+        navigate("/otp");
       } else {
-        setError(response.data?.message || "Login failed");
+        setError(response?.data?.message || "Login failed");
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError(err.response?.data?.message || "Login failed");
+
+      setError(err?.response?.data?.message || err.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -51,6 +67,7 @@ const LoginForm = () => {
       )}
 
       <div className="space-y-4">
+        {/* IDENTIFIER */}
         <div>
           <label
             htmlFor="identifier"
@@ -58,18 +75,20 @@ const LoginForm = () => {
           >
             Email or Username
           </label>
+
           <input
             id="identifier"
             name="identifier"
             type="text"
             required
-            className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/85 px-3 py-2 text-emerald-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
-            placeholder="Email Or Username"
             value={formData.identifier}
             onChange={handleChange}
+            placeholder="Email Or Username"
+            className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/85 px-3 py-2 text-emerald-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
           />
         </div>
 
+        {/* PASSWORD */}
         <div>
           <label
             htmlFor="password"
@@ -77,27 +96,40 @@ const LoginForm = () => {
           >
             Password
           </label>
+
           <input
             id="password"
             name="password"
             type="password"
             required
-            className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/85 px-3 py-2 text-emerald-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
-            placeholder="••••••••"
             value={formData.password}
             onChange={handleChange}
+            placeholder="••••••••"
+            className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/85 px-3 py-2 text-emerald-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
           />
         </div>
       </div>
 
-      <div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="group relative w-full flex justify-center py-2.5 px-4 text-sm font-semibold rounded-md text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-slate-900 shadow-[0_0_22px_rgba(79,70,229,0.9)] disabled:opacity-60"
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
+      {/* LOGIN BUTTON */}
+      <button
+        type="submit"
+        disabled={loading}
+        className="group relative w-full flex justify-center py-2.5 px-4 text-sm font-semibold rounded-md text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-slate-900 shadow-[0_0_22px_rgba(79,70,229,0.9)] disabled:opacity-60"
+      >
+        {loading ? "Logging in..." : "Login"}
+      </button>
+
+      {/* ADMIN SIGNUP LINK (NEW ADDED) */}
+      <div className="text-center mt-3">
+        <p className="text-sm text-slate-300">
+          Need admin access?{" "}
+          <span
+            onClick={() => navigate("/admin-signup")}
+            className="text-indigo-400 cursor-pointer hover:underline"
+          >
+            Create Admin Account
+          </span>
+        </p>
       </div>
     </form>
   );
