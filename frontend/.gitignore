@@ -1,4 +1,6 @@
+# ===============================
 # Logs
+# ===============================
 logs
 *.log
 npm-debug.log*
@@ -7,16 +9,64 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# ===============================
+# Node
+# ===============================
 node_modules
 dist
 dist-ssr
 *.local
 
-# Editor directories and files
+# ===============================
+# Python
+# ===============================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv
+venv/
+env/
+
+# ===============================
+# ML / AI Models (IMPORTANT)
+# ===============================
+*.pt
+*.onnx
+*.h5
+*.pkl
+*.joblib
+
+# YOLO / training outputs
+runs/
+weights/
+checkpoints/
+models/*.pt
+models/*.onnx
+
+# GAN outputs
+generated/
+synthetic/
+augmented/
+
+# ===============================
+# Data / SAR Images (optional but recommended)
+# ===============================
+data/
+datasets/
+*.tif
+*.tiff
+*.npy
+
+# ===============================
+# Editor / OS files
+# ===============================
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj

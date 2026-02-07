@@ -9,7 +9,8 @@ const CommandMarquee = () => {
   // Show only on Command Center (root path)
   if (location.pathname !== "/") return null;
 
-  const message = "Welcome to Indian Military SAR Application by Team GRG";
+  const message =
+    "Welcome to Indian Military SAR Application by Team Giri Gani Chethan";
 
   return (
     <div className="w-full bg-slate-950/80 border-b border-emerald-500/40 overflow-hidden">

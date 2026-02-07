@@ -19,15 +19,32 @@ const Navbar = () => {
     <header className="sticky top-0 z-30">
       <div className="w-full bg-slate-950/90 border-b border-emerald-500/40 shadow-[0_10px_40px_rgba(0,0,0,0.9)]">
         <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-6">
-          {/* Left brand with India flag */}
+          {/* Left brand with FIXED ROUND FLAG */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="relative h-10 w-10 rounded-full border border-emerald-400/90 bg-emerald-500/10 shadow-[0_0_22px_rgba(16,185,129,0.95)] group-hover:shadow-[0_0_32px_rgba(16,185,129,1)] transition-shadow overflow-hidden">
+            <div
+              className="
+                h-10 w-10
+                rounded-full
+                overflow-hidden
+                border border-emerald-400/90
+                bg-emerald-500/10
+                shadow-[0_0_22px_rgba(16,185,129,0.95)]
+                group-hover:shadow-[0_0_32px_rgba(16,185,129,1)]
+                transition-shadow
+                flex items-center justify-center
+              "
+            >
               <img
                 src={indiaFlag}
-                alt="India flag"
-                className="h-full w-full object-cover"
+                alt="India Flag"
+                className="
+                  h-full w-full
+                  object-cover
+                  rounded-full
+                "
               />
             </div>
+
             <div className="leading-tight">
               <div className="text-[0.6rem] tracking-[0.32em] uppercase text-emerald-300/85">
                 SARSAT
@@ -74,6 +91,19 @@ const Navbar = () => {
                 }`}
               >
                 Dashboard
+              </Link>
+            )}
+
+            {admin && (
+              <Link
+                to="/sar-detection"
+                className={`px-3 py-1 rounded-full ${
+                  isActive("/sar-detection")
+                    ? "bg-lime-500/40 text-lime-50 shadow-[0_0_18px_rgba(163,230,53,1)]"
+                    : "text-lime-200 hover:bg-lime-500/20"
+                }`}
+              >
+                SAR Detection
               </Link>
             )}
           </nav>

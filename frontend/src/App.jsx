@@ -13,6 +13,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import PublicNewsPage from "./pages/PublicNewsPage";
 import VehicleDetailsPage from "./pages/VehicleDetailsPage";
 import VehiclesPage from "./pages/VehiclesPage";
+import SarDetectionPage from "./pages/SarDetectionPage"; // ✅ NEW
 import AppLayout from "./components/layout/AppLayout";
 
 const ProtectedRoute = ({ children }) => {
@@ -39,10 +40,10 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/otp" element={<OtpPage />} />
 
-            {/* Public: Command Center (news) */}
+            {/* Public */}
             <Route path="/" element={<PublicNewsPage />} />
 
-            {/* Protected: vehicles list + details */}
+            {/* Protected */}
             <Route
               path="/vehicles"
               element={
@@ -51,6 +52,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/vehicles/:id"
               element={
@@ -60,12 +62,21 @@ function App() {
               }
             />
 
-            {/* Protected: admin dashboard */}
             <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
                   <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* 🔥 SAR DETECTION PAGE */}
+            <Route
+              path="/sar-detection"
+              element={
+                <ProtectedRoute>
+                  <SarDetectionPage />
                 </ProtectedRoute>
               }
             />

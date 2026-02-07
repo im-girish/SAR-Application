@@ -46,3 +46,11 @@ build/
 
 # Node / Vite build output
 frontend/dist
+
+# Python
+venv/
+backend/ml_service/venv/
+__pycache__/
+
+# YOLO training output (optional)
+runs/

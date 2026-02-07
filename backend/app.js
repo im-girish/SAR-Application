@@ -7,6 +7,7 @@ import authRoutes from "./src/routes/auth.routes.js";
 import vehicleRoutes from "./src/routes/vehicle.routes.js";
 import newsRoutes from "./src/routes/news.routes.js";
 import { authMiddleware } from "./src/middlewares/auth.middleware.js";
+import detectRoute from "./src/routes/detect.routes.js";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/news", newsRoutes);
+app.use("/api/ml", detectRoute);
 
 // Protected test route
 app.get("/api/protected", authMiddleware, (req, res) => {

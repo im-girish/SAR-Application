@@ -1,0 +1,27 @@
+{
+  "BMP2": {
+    "type": "Infantry Fighting Vehicle",
+    "threat": "High mobility armored vehicle capable of troop transport and direct fire support.",
+    "harm": "Can cause significant ground damage; neutralizing reduces mechanized infantry capability."
+  },
+  "T72": {
+    "type": "Main Battle Tank",
+    "threat": "Heavily armored tank equipped with high-caliber cannons.",
+    "harm": "Potential to destroy structures, armored units, and fortifications."
+  },
+  "BTR70": {
+    "type": "Armored Personnel Carrier",
+    "threat": "Transports troops, offers light firepower and mobility.",
+    "harm": "Neutralizing reduces enemy mobility and deployment speed."
+  },
+  "BMP1": {
+    "type": "Infantry Fighting Vehicle (variant)",
+    "threat": "Armored vehicle for troop transport and support.",
+    "harm": "Can transport infantry into combat and provide fire support."
+  },
+  "UNKNOWN": {
+    "type": "Unknown vehicle",
+    "threat": "",
+    "harm": "No information available for this class."
+  }
+}

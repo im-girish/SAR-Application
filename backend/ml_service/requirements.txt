@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+pillow
+torch
+numpy
+git+https://github.com/ultralytics/ultralytics
