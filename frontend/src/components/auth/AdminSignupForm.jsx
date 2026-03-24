@@ -16,14 +16,58 @@ const AdminSignupForm = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+  // 🔐 Password Validation Function
+  const validatePassword = (password, username, email) => {
+    if (password.length < 8) {
+      return "Password must be at least 8 characters";
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      return "Must include at least one uppercase letter";
+    }
+
+    if (!/[a-z]/.test(password)) {
+      return "Must include at least one lowercase letter";
+    }
+
+    if (!/[0-9]/.test(password)) {
+      return "Must include at least one number";
+    }
+
+    if (!/[!@#$%^&*(),.?\":{}|<>_+=-]/.test(password)) {
+      return "Must include at least one special character";
+    }
+
+    if (username && password.toLowerCase().includes(username.toLowerCase())) {
+      return "Password should not contain username";
+    }
+
+    if (email && password.toLowerCase().includes(email.toLowerCase())) {
+      return "Password should not contain email";
+    }
+
+    return "";
   };
 
+  // 🔄 Handle Input Change
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // 🔥 Live password validation
+    if (name === "password") {
+      const msg = validatePassword(value, formData.username, formData.email);
+      setPasswordError(msg);
+    }
+  };
+
+  // 🚀 Handle Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -31,8 +75,20 @@ const AdminSignupForm = () => {
     setError("");
     setMessage("");
 
+    // 🔥 Final password validation before API call
+    const passwordValidation = validatePassword(
+      formData.password,
+      formData.username,
+      formData.email,
+    );
+
+    if (passwordValidation) {
+      setPasswordError(passwordValidation);
+      setLoading(false);
+      return;
+    }
+
     try {
-      // ✅ Combine country code + phone for Twilio format
       const payload = {
         username: formData.username,
         email: formData.email,
@@ -52,6 +108,8 @@ const AdminSignupForm = () => {
           phone: "",
           password: "",
         });
+
+        setPasswordError("");
       } else {
         setError(res.data?.message || "Signup failed");
       }
@@ -69,7 +127,10 @@ const AdminSignupForm = () => {
           Create Admin Account
         </h2>
 
+        {/* ✅ Success */}
         {message && <p className="text-green-400 mb-3">{message}</p>}
+
+        {/* ❌ Backend Error */}
         {error && <p className="text-red-400 mb-3">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -93,13 +154,13 @@ const AdminSignupForm = () => {
             className="w-full bg-slate-900 border border-emerald-500/40 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-emerald-400 outline-none"
           />
 
-          {/* Phone with Country Code */}
+          {/* Phone */}
           <div className="flex gap-2">
             <select
               name="countryCode"
               value={formData.countryCode}
               onChange={handleChange}
-              className="bg-slate-900 border border-emerald-500/40 rounded-md px-2 py-2 text-white focus:ring-2 focus:ring-emerald-400 outline-none"
+              className="bg-slate-900 border border-emerald-500/40 rounded-md px-2 py-2 text-white"
             >
               <option value="+91">+91 🇮🇳</option>
               <option value="+1">+1 🇺🇸</option>
@@ -113,7 +174,7 @@ const AdminSignupForm = () => {
               value={formData.phone}
               onChange={handleChange}
               required
-              className="flex-1 bg-slate-900 border border-emerald-500/40 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-emerald-400 outline-none"
+              className="flex-1 bg-slate-900 border border-emerald-500/40 rounded-md px-3 py-2 text-white"
             />
           </div>
 
@@ -125,10 +186,15 @@ const AdminSignupForm = () => {
             value={formData.password}
             onChange={handleChange}
             required
-            className="w-full bg-slate-900 border border-emerald-500/40 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-emerald-400 outline-none"
+            className="w-full bg-slate-900 border border-emerald-500/40 rounded-md px-3 py-2 text-white"
           />
 
-          {/* Submit Button */}
+          {/* 🔐 Password Rule Message */}
+          {passwordError && (
+            <p className="text-yellow-400 text-sm">{passwordError}</p>
+          )}
+
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
@@ -138,7 +204,7 @@ const AdminSignupForm = () => {
           </button>
         </form>
 
-        {/* Back Button */}
+        {/* Back */}
         <button
           onClick={() => navigate("/")}
           className="mt-5 w-full text-sm text-emerald-300 hover:underline"

@@ -1,7 +1,7 @@
 import axiosClient from "./axiosClient";
 
 export const newsApi = {
-  getMilitaryNews: () => {
-    return axiosClient.get("/news");
+  getMilitaryNews: (category = "") => {
+    return axiosClient.get(`/news${category ? `?category=${category}` : ""}`);
   },
 };

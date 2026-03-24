@@ -1,7 +1,8 @@
 import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import indiaFlag from "../../assets/Flag_of_India.svg.webp";
+// import indiaFlag from "../../assets/Flag_of_India.svg.webp";
+import indiaFlag from "../../assets/India.jpeg";
 
 const Navbar = () => {
   const { admin, logout } = useAuth();
