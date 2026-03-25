@@ -1,6 +1,5 @@
 # app.py
-# FINAL STABLE VERSION — SAR Target Recognition (YOLOv5 ONNX + FastAPI)
-# FIX: NumPy values converted to native Python types
+# FINAL FIXED VERSION — Render Stable (FastAPI + ONNX)
 
 import io
 import os
@@ -24,18 +23,10 @@ NAMES = ["BMP2", "BTR70", "T72"]
 with open(ROLES_PATH, "r") as f:
     ROLE_MAP = json.load(f)
 
-# -------------------- LOAD MODEL --------------------
-sess_opts = ort.SessionOptions()
-sess_opts.intra_op_num_threads = 1
-
-session = ort.InferenceSession(
-    MODEL_ONNX,
-    sess_opts,
-    providers=["CPUExecutionProvider"]
-)
-
-INPUT_NAME = session.get_inputs()[0].name
-OUTPUT_NAME = session.get_outputs()[0].name
+# ❌ REMOVED: MODEL LOADING FROM GLOBAL (CAUSES CRASH ON RENDER)
+# session = ort.InferenceSession(...)
+# INPUT_NAME = ...
+# OUTPUT_NAME = ...
 
 # -------------------- FASTAPI --------------------
 app = FastAPI(title="SAR Target Recognition API")
@@ -47,6 +38,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ✅ ADDED: ROOT ROUTE (RENDER NEEDS THIS)
+@app.get("/")
+def home():
+    return {"message": "ML Service Running 🚀"}
 
 # -------------------- HELPERS --------------------
 def letterbox(img, new_shape=(640, 640), color=(114, 114, 114)):
@@ -96,6 +92,20 @@ def nms(boxes, scores, iou_thresh=0.45):
 # -------------------- API --------------------
 @app.post("/detect")
 async def detect(file: UploadFile = File(...)):
+
+    # ✅ CHANGED: LOAD MODEL INSIDE FUNCTION (PREVENTS CRASH)
+    print("Loading model...")
+
+    session = ort.InferenceSession(
+        MODEL_ONNX,
+        providers=["CPUExecutionProvider"]
+    )
+
+    INPUT_NAME = session.get_inputs()[0].name
+    OUTPUT_NAME = session.get_outputs()[0].name
+
+    print("Model loaded successfully ✅")
+
     # Read image
     image_bytes = await file.read()
     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
@@ -112,7 +122,7 @@ async def detect(file: UploadFile = File(...)):
     # Inference
     preds = session.run([OUTPUT_NAME], {INPUT_NAME: img_chw})[0][0]
 
-    CONF_THRESH = 0.35 #0.25
+    CONF_THRESH = 0.35
 
     boxes, scores, class_ids = [], [], []
 
@@ -127,7 +137,6 @@ async def detect(file: UploadFile = File(...)):
 
         cx, cy, w, h = row[:4]
 
-        # Handle normalized vs pixel outputs
         if cx <= 1.5:
             cx *= 640
             cy *= 640
@@ -139,13 +148,11 @@ async def detect(file: UploadFile = File(...)):
 
         x1, y1, x2, y2 = xywh_to_xyxy(cx, cy, w, h)
 
-        # Remove padding & rescale
         x1 = float((x1 - pad_x) / ratio)
         y1 = float((y1 - pad_y) / ratio)
         x2 = float((x2 - pad_x) / ratio)
         y2 = float((y2 - pad_y) / ratio)
 
-        # Clip
         x1 = max(0.0, min(float(w0), x1))
         y1 = max(0.0, min(float(h0), y1))
         x2 = max(0.0, min(float(w0), x2))
