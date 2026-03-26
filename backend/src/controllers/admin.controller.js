@@ -16,7 +16,7 @@ export const adminSignup = async (req, res) => {
 
     // Check existing admin
     const existingAdmin = await Admin.findOne({
-      $or: [{ email }, { username }],
+      $or: [{ email }, { phone }, { username }],
     });
 
     if (existingAdmin) {

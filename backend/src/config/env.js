@@ -18,9 +18,6 @@ export default {
     apiKey: process.env.NEWS_API_KEY,
     baseUrl: process.env.NEWS_API_BASE_URL,
   },
-  ml: {
-    url: process.env.ML_URL || "https://sar-application.onrender.com/detect",
-  },
   admin: {
     defaultPhone: process.env.DEFAULT_ADMIN_PHONE,
     defaultEmail: process.env.DEFAULT_ADMIN_EMAIL,
