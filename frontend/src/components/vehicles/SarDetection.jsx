@@ -28,9 +28,13 @@ const SarDetectionPage = () => {
     formData.append("file", file);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/ml", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await axios.post(
+        "https://sar-application.onrender.com/api/ml",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      );
 
       const preds = res.data?.data?.predictions || [];
       setResults(preds);
@@ -69,7 +73,7 @@ const SarDetectionPage = () => {
       ctx.fillText(
         `${det.class} (${(det.confidence * 100).toFixed(1)}%)`,
         x1,
-        y1 > 15 ? y1 - 5 : y1 + 15
+        y1 > 15 ? y1 - 5 : y1 + 15,
       );
     });
   };

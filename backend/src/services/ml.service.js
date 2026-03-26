@@ -1,6 +1,7 @@
 // src/services/ml.service.js
 import axios from "axios";
 import FormData from "form-data";
+import config from "../config/env.js";
 
 /**
  * detectFromBuffer
@@ -9,7 +10,7 @@ import FormData from "form-data";
  * @returns {Promise<Object>} - response JSON from ML service
  */
 export async function detectFromBuffer(buffer, filename = "image.jpg") {
-  const ML_URL = process.env.ML_URL || "http://localhost:8000/detect";
+  const ML_URL = config.ml.url;
 
   const form = new FormData();
   form.append("file", buffer, { filename, contentType: "image/jpeg" });

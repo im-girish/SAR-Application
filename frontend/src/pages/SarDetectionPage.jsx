@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
+import { uploadSarImage } from "../api/sarApi";
 
 const SarDetectionPage = () => {
   const navigate = useNavigate();
@@ -90,16 +91,20 @@ const SarDetectionPage = () => {
     if (!file) return alert("Please select SAR image");
 
     setLoading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const res = await axiosClient.post("/ml", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      setResults(res.data?.data?.predictions || []);
-    } catch {
-      alert("Detection failed");
+      console.log("🚀 Starting detection process...");
+      const response = await uploadSarImage(file);
+
+      if (response.success) {
+        setResults(response.data?.predictions || []);
+        console.log("✅ Detection complete! Python returned predictions.");
+      } else {
+        alert(response.message || "Detection failed");
+        console.error("Detection error:", response);
+      }
+    } catch (error) {
+      alert("Detection failed: " + error.message);
+      console.error("Detection error:", error);
     } finally {
       setLoading(false);
     }
@@ -171,6 +176,28 @@ const SarDetectionPage = () => {
 
       {/* RESULTS */}
       <h2 className="text-3xl font-bold text-lime-300">Detection Results</h2>
+
+      {/* PYTHON STATUS */}
+      {imageUrl && (
+        <div
+          className={`px-4 py-2 rounded-lg text-sm font-semibold ${
+            results.length > 0
+              ? "bg-green-500/20 text-green-300 border border-green-500/50"
+              : loading
+                ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/50"
+                : "bg-gray-500/20 text-gray-300 border border-gray-500/50"
+          }`}
+        >
+          {loading && "🔄 Python ML Service: Processing..."}
+          {!loading &&
+            results.length > 0 &&
+            "✅ Python ML Service: Response Received"}
+          {!loading &&
+            results.length === 0 &&
+            imageUrl &&
+            "📍 Python ML Service: No targets detected"}
+        </div>
+      )}
 
       {/* UNKNOWN */}
       {results.length === 0 && imageUrl && !loading && (
