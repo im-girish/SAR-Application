@@ -11,7 +11,7 @@ const adminSchema = new mongoose.Schema(
     phone: {
       type: String,
       required: true,
-      unique: true,
+      unique: false,
       trim: true,
     },
     email: {
@@ -36,7 +36,7 @@ const adminSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export default mongoose.model("Admin", adminSchema);
