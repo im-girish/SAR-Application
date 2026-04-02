@@ -11,7 +11,7 @@ const adminSchema = new mongoose.Schema(
     phone: {
       type: String,
       required: true,
-      unique: false,
+      // unique: false,
       trim: true,
     },
     email: {

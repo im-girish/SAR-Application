@@ -30,7 +30,7 @@ export const adminSignup = async (req, res) => {
     const newAdmin = await Admin.create({
       username,
       email,
-      phone,
+      // phone,
       password: hashedPassword,
     });
 
