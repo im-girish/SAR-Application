@@ -7,6 +7,8 @@ import OtpForm from "../components/auth/OtpForm";
 const OtpPage = () => {
   const { admin } = useAuth();
   const tempEmail = localStorage.getItem("tempEmail");
+  const otpMethod = localStorage.getItem("otpMethod") || "sms";
+  const otpDestination = localStorage.getItem("otpDestination");
 
   if (admin) {
     return <Navigate to="/dashboard" />;
@@ -25,7 +27,10 @@ const OtpPage = () => {
             OTP Verification
           </h2>
           <p className="mt-2 text-sm text-emerald-100/80">
-            Enter the one-time passcode sent to your secure channel.
+            {otpMethod === "email" 
+              ? `📧 Enter the OTP sent to: ${otpDestination}`
+              : `📱 Enter the OTP sent to your phone`
+            }
           </p>
         </div>
         <OtpForm />

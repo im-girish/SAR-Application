@@ -7,6 +7,8 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
@@ -19,6 +21,7 @@ import VehicleDetailsPage from "./pages/VehicleDetailsPage";
 import VehiclesPage from "./pages/VehiclesPage";
 import SarDetectionPage from "./pages/SarDetectionPage";
 import AdminSignupPage from "./pages/AdminSignupPage"; // ✅ signup page
+import AdminProfilePage from "./pages/AdminProfilePage"; // ✅ profile page
 
 // Layout
 import AppLayout from "./components/layout/AppLayout";
@@ -68,6 +71,15 @@ function App() {
             />
 
             <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <AdminProfilePage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="/vehicles"
               element={
                 <ProtectedRoute>
@@ -100,6 +112,18 @@ function App() {
           </Routes>
         </AppLayout>
       </Router>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </AuthProvider>
   );
 }

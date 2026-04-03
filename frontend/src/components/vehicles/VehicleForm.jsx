@@ -1,5 +1,6 @@
 // D:\SAR-APP\frontend\src\components\vehicles\VehicleForm.jsx
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import { vehicleApi } from "../../api/vehicleApi";
 
 const COUNTRY_OPTIONS = [
@@ -120,18 +121,21 @@ const VehicleForm = ({ vehicle, onSave, onCancel }) => {
 
       if (vehicle) {
         await vehicleApi.update(vehicle._id, submitData);
+        toast.success("✅ Vehicle updated successfully!");
       } else {
         await vehicleApi.create(submitData);
+        toast.success("✅ Vehicle added successfully!");
       }
 
       onSave();
     } catch (err) {
-      setError(
+      const errorMsg =
         err.response?.data?.message ||
-          (Array.isArray(err.response?.data?.errors)
-            ? err.response.data.errors.join(", ")
-            : "Failed to save vehicle")
-      );
+        (Array.isArray(err.response?.data?.errors)
+          ? err.response.data.errors.join(", ")
+          : "Failed to save vehicle");
+      setError(errorMsg);
+      toast.error(errorMsg);
       console.error("API error:", err.response?.data || err);
     } finally {
       setLoading(false);

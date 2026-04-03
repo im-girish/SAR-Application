@@ -1,6 +1,7 @@
 // D:\SAR-APP\frontend\src\pages\AdminDashboard.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import VehicleList from "../components/vehicles/VehicleList";
 import VehicleForm from "../components/vehicles/VehicleForm";
@@ -59,9 +60,10 @@ const AdminDashboard = () => {
       try {
         await vehicleApi.delete(id);
         fetchVehicles();
+        toast.success("✅ Vehicle deleted successfully!");
       } catch (error) {
         console.error("Error deleting vehicle:", error);
-        alert("Failed to delete vehicle");
+        toast.error(error.response?.data?.message || "❌ Failed to delete vehicle");
       }
     }
   };

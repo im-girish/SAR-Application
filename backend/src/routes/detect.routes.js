@@ -1,7 +1,11 @@
 // backend/src/routes/detect.routes.js
 import express from "express";
 import multer from "multer";
-import { detectHandler } from "../controllers/detect.controller.js";
+import {
+  detectHandler,
+  generatePdfReport,
+  sendReportEmail,
+} from "../controllers/detect.controller.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
@@ -25,7 +29,19 @@ router.post(
   "/",
   authMiddleware, // 🔐 Admin verification
   upload.single("file"),
-  detectHandler
+  detectHandler,
 );
+
+/**
+ * POST /api/ml/generate-pdf
+ * Generate PDF report for detection results
+ */
+router.post("/generate-pdf", authMiddleware, generatePdfReport);
+
+/**
+ * POST /api/ml/send-report
+ * Send detection report via email to admin
+ */
+router.post("/send-report", authMiddleware, sendReportEmail);
 
 export default router;

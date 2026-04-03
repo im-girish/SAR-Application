@@ -12,14 +12,18 @@ const tempTokenStore = new Map();
 // POST /api/auth/login
 export const login = async (req, res) => {
   try {
-    const { identifier, password } = req.body; // email or username
+    const { identifier, password, otpMethod = "sms" } = req.body; // email or username
 
     if (!identifier || !password) {
       return errorResponse(
         res,
         "Identifier (email or username) and password are required",
-        400
+        400,
       );
+    }
+
+    if (!["sms", "email"].includes(otpMethod)) {
+      return errorResponse(res, "OTP method must be 'sms' or 'email'", 400);
     }
 
     const normalizedIdentifier = identifier.trim();
@@ -35,6 +39,7 @@ export const login = async (req, res) => {
 
     console.log("LOGIN IDENTIFIER:", normalizedIdentifier);
     console.log("FOUND ADMIN:", !!admin);
+    console.log("OTP METHOD:", otpMethod);
 
     if (!admin) {
       return errorResponse(res, "Invalid credentials", 401);
@@ -53,26 +58,37 @@ export const login = async (req, res) => {
       step: "otp_required",
     });
 
+    // Determine OTP destination based on method
+    const otpDestination = otpMethod === "email" ? admin.email : admin.phone;
+
     // Store temp data keyed by email
     tempTokenStore.set(admin.email, {
       adminId: admin._id,
       phone: admin.phone,
+      email: admin.email,
+      otpMethod: otpMethod,
     });
 
-    // Send OTP to admin's phone
-    const otpResult = await sendOtp(admin.phone);
+    // Send OTP using selected method
+    const otpResult = await sendOtp(otpDestination, otpMethod);
     if (!otpResult.success) {
-      return errorResponse(res, "Failed to send OTP", 500);
+      return errorResponse(res, `Failed to send OTP via ${otpMethod}`, 500);
     }
 
-    // successResponse(res, data, message, statusCode?)
+    const message =
+      otpMethod === "email"
+        ? `OTP sent to your registered email: ${admin.email}`
+        : `OTP sent to your registered phone: ${admin.phone}`;
+
     return successResponse(
       res,
       {
         tempToken,
         otpSent: true,
+        otpMethod: otpMethod,
+        destination: otpMethod === "email" ? admin.email : admin.phone,
       },
-      "OTP sent to your registered phone number"
+      message,
     );
   } catch (error) {
     console.error("Login error:", error);
@@ -109,10 +125,13 @@ export const verifyOtpAndLogin = async (req, res) => {
       return errorResponse(res, "Session expired. Please login again.", 400);
     }
 
-    // Verify OTP with provider
-    const otpResult = await verifyOtp(tempData.phone, otp);
+    // Verify OTP using the same method that was used to send it
+    const otpDestination =
+      tempData.otpMethod === "email" ? tempData.email : tempData.phone;
+    const otpResult = await verifyOtp(otpDestination, otp, tempData.otpMethod);
+
     if (!otpResult.success) {
-      return errorResponse(res, "Invalid OTP", 400);
+      return errorResponse(res, "Invalid or expired OTP", 400);
     }
 
     // Get fresh admin data
@@ -138,10 +157,189 @@ export const verifyOtpAndLogin = async (req, res) => {
           email: admin.email,
         },
       },
-      "Login successful"
+      "Login successful",
     );
   } catch (error) {
     console.error("OTP verification error:", error);
     return errorResponse(res, "OTP verification failed", 500);
+  }
+};
+
+// GET /api/auth/profile
+// Get current admin profile data
+export const getProfile = async (req, res) => {
+  try {
+    const adminId = req.admin?.id; // From JWT middleware
+
+    if (!adminId) {
+      return errorResponse(res, "Not authenticated", 401);
+    }
+
+    const admin = await Admin.findById(adminId).select(
+      "id name email phone username createdAt",
+    );
+
+    if (!admin) {
+      return errorResponse(res, "Admin not found", 404);
+    }
+
+    return successResponse(
+      res,
+      {
+        id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        phone: admin.phone,
+        username: admin.username,
+        createdAt: admin.createdAt,
+      },
+      "Profile retrieved successfully",
+    );
+  } catch (error) {
+    console.error("Get profile error:", error);
+    return errorResponse(res, "Failed to retrieve profile", 500);
+  }
+};
+
+// PUT /api/auth/profile
+// Update admin profile (email, phone, username)
+export const updateProfile = async (req, res) => {
+  try {
+    const adminId = req.admin?.id; // From JWT middleware
+    const { email, phone, username } = req.body;
+
+    if (!adminId) {
+      return errorResponse(res, "Not authenticated", 401);
+    }
+
+    // Validate input
+    if (!email || !phone || !username) {
+      return errorResponse(res, "Email, phone, and username are required", 400);
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      return errorResponse(res, "Invalid email format", 400);
+    }
+
+    if (username.trim().length < 3) {
+      return errorResponse(res, "Username must be at least 3 characters", 400);
+    }
+
+    if (phone.trim().length < 10) {
+      return errorResponse(res, "Phone must be at least 10 characters", 400);
+    }
+
+    // Check if email already exists (excluding current admin)
+    const existingEmail = await Admin.findOne({
+      email: email.trim().toLowerCase(),
+      _id: { $ne: adminId },
+    });
+
+    if (existingEmail) {
+      return errorResponse(res, "Email already in use", 400);
+    }
+
+    // Check if username already exists (excluding current admin)
+    const existingUsername = await Admin.findOne({
+      username: username.trim(),
+      _id: { $ne: adminId },
+    });
+
+    if (existingUsername) {
+      return errorResponse(res, "Username already in use", 400);
+    }
+
+    const admin = await Admin.findByIdAndUpdate(
+      adminId,
+      {
+        email: email.trim().toLowerCase(),
+        phone: phone.trim(),
+        username: username.trim(),
+      },
+      { new: true, runValidators: true },
+    ).select("id email phone username");
+
+    if (!admin) {
+      return errorResponse(res, "Admin not found", 404);
+    }
+
+    return successResponse(
+      res,
+      {
+        id: admin._id,
+        email: admin.email,
+        phone: admin.phone,
+        username: admin.username,
+      },
+      "Profile updated successfully",
+    );
+  } catch (error) {
+    console.error("Update profile error:", error);
+    return errorResponse(res, "Failed to update profile", 500);
+  }
+};
+
+// POST /api/auth/change-password
+// Change admin password
+export const changePassword = async (req, res) => {
+  try {
+    const adminId = req.admin?.id; // From JWT middleware
+    const { currentPassword, newPassword } = req.body;
+
+    if (!adminId) {
+      return errorResponse(res, "Not authenticated", 401);
+    }
+
+    // Validate input
+    if (!currentPassword || !newPassword) {
+      return errorResponse(
+        res,
+        "Current password and new password are required",
+        400,
+      );
+    }
+
+    if (newPassword.length < 8) {
+      return errorResponse(
+        res,
+        "New password must be at least 8 characters",
+        400,
+      );
+    }
+
+    if (currentPassword === newPassword) {
+      return errorResponse(
+        res,
+        "New password must be different from current password",
+        400,
+      );
+    }
+
+    const admin = await Admin.findById(adminId);
+
+    if (!admin) {
+      return errorResponse(res, "Admin not found", 404);
+    }
+
+    // Verify current password
+    const isPasswordValid = await comparePassword(
+      currentPassword,
+      admin.password,
+    );
+
+    if (!isPasswordValid) {
+      return errorResponse(res, "Current password is incorrect", 401);
+    }
+
+    // Hash new password (Mongoose pre-save hook will handle this)
+    admin.password = newPassword;
+    await admin.save();
+
+    return successResponse(res, {}, "Password changed successfully");
+  } catch (error) {
+    console.error("Change password error:", error);
+    return errorResponse(res, "Failed to change password", 500);
   }
 };

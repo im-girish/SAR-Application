@@ -7,6 +7,7 @@ const passwordRegex =
 export const loginValidator = Joi.object({
   identifier: Joi.string().required(),
   password: Joi.string().required(),
+  otpMethod: Joi.string().valid("sms", "email").optional().default("sms"),
 });
 
 export const verifyOtpValidator = Joi.object({

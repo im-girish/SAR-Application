@@ -14,6 +14,12 @@ export default {
     authToken: process.env.TWILIO_AUTH_TOKEN,
     verifyServiceSid: process.env.TWILIO_VERIFY_SERVICE_SID,
   },
+  email: {
+    service: process.env.EMAIL_SERVICE || "gmail",
+    user: process.env.EMAIL_USER,
+    password: process.env.EMAIL_PASSWORD,
+    from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+  },
   news: {
     apiKey: process.env.NEWS_API_KEY,
     baseUrl: process.env.NEWS_API_BASE_URL,

@@ -6,6 +6,7 @@ const LoginForm = () => {
   const [formData, setFormData] = useState({
     identifier: "",
     password: "",
+    otpMethod: "sms", // SMS or Email
   });
 
   const [loading, setLoading] = useState(false);
@@ -32,7 +33,11 @@ const LoginForm = () => {
     setError("");
 
     try {
-      const response = await authApi.login(formData);
+      const response = await authApi.login({
+        identifier: formData.identifier,
+        password: formData.password,
+        otpMethod: formData.otpMethod,
+      });
 
       console.log("LOGIN RESPONSE", response.data);
 
@@ -42,8 +47,10 @@ const LoginForm = () => {
           localStorage.setItem("tempToken", response.data.data.tempToken);
         }
 
-        // Optional identifier storage
+        // Save identifier and OTP method
         localStorage.setItem("tempEmail", formData.identifier);
+        localStorage.setItem("otpMethod", formData.otpMethod);
+        localStorage.setItem("otpDestination", response.data.data?.destination);
 
         navigate("/otp");
       } else {
@@ -107,6 +114,40 @@ const LoginForm = () => {
             placeholder="••••••••"
             className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/85 px-3 py-2 text-emerald-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
           />
+        </div>
+
+        {/* OTP METHOD SELECTION */}
+        <div>
+          <label className="block text-xs font-semibold text-emerald-200 uppercase tracking-wide mb-3">
+            📨 OTP Delivery Method
+          </label>
+          <div className="flex gap-4">
+            {/* SMS Option */}
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="radio"
+                name="otpMethod"
+                value="sms"
+                checked={formData.otpMethod === "sms"}
+                onChange={handleChange}
+                className="w-4 h-4 text-indigo-600 accent-indigo-600"
+              />
+              <span className="ml-2 text-sm text-emerald-100">📱 SMS (Phone)</span>
+            </label>
+
+            {/* Email Option */}
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="radio"
+                name="otpMethod"
+                value="email"
+                checked={formData.otpMethod === "email"}
+                onChange={handleChange}
+                className="w-4 h-4 text-indigo-600 accent-indigo-600"
+              />
+              <span className="ml-2 text-sm text-emerald-100">✉️ Email (Gmail)</span>
+            </label>
+          </div>
         </div>
       </div>
 
