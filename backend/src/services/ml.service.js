@@ -9,8 +9,8 @@ import FormData from "form-data";
  * @returns {Promise<Object>} - response JSON from ML service
  */
 export async function detectFromBuffer(buffer, filename = "image.jpg") {
-  const ML_URL =
-    process.env.ML_URL || "https://sar-application.onrender.com/detect";
+  const ML_URL = process.env.ML_URL || "http://localhost:8000/detect";
+  // process.env.ML_URL || "https://sar-application.onrender.com/detect";
 
   const form = new FormData();
   form.append("file", buffer, { filename, contentType: "image/jpeg" });
