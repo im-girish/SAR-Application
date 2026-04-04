@@ -11,6 +11,7 @@ const LoginForm = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -104,16 +105,25 @@ const LoginForm = () => {
             Password
           </label>
 
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="••••••••"
-            className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/85 px-3 py-2 text-emerald-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
-          />
+          <div className="relative">
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              required
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="••••••••"
+              className="mt-1 block w-full rounded-md border border-emerald-500/40 bg-slate-950/85 px-3 py-2 pr-10 text-emerald-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/80"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-emerald-300 hover:text-emerald-100"
+            >
+              {showPassword ? "👁️" : "🔒"}
+            </button>
+          </div>
         </div>
 
         {/* OTP METHOD SELECTION */}
@@ -132,7 +142,9 @@ const LoginForm = () => {
                 onChange={handleChange}
                 className="w-4 h-4 text-indigo-600 accent-indigo-600"
               />
-              <span className="ml-2 text-sm text-emerald-100">📱 SMS (Phone)</span>
+              <span className="ml-2 text-sm text-emerald-100">
+                📱 SMS (Phone)
+              </span>
             </label>
 
             {/* Email Option */}
@@ -145,7 +157,9 @@ const LoginForm = () => {
                 onChange={handleChange}
                 className="w-4 h-4 text-indigo-600 accent-indigo-600"
               />
-              <span className="ml-2 text-sm text-emerald-100">✉️ Email (Gmail)</span>
+              <span className="ml-2 text-sm text-emerald-100">
+                ✉️ Email (Gmail)
+              </span>
             </label>
           </div>
         </div>

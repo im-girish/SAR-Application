@@ -17,6 +17,7 @@ const AdminSignupForm = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   // 🔐 Password Validation Function
   const validatePassword = (password, username, email) => {
@@ -179,15 +180,24 @@ const AdminSignupForm = () => {
           </div>
 
           {/* Password */}
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            className="w-full bg-slate-900 border border-emerald-500/40 rounded-md px-3 py-2 text-white"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="w-full bg-slate-900 border border-emerald-500/40 rounded-md px-3 py-2 pr-10 text-white"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-emerald-400 hover:text-emerald-200"
+            >
+              {showPassword ? "👁️" : "🔒"}
+            </button>
+          </div>
 
           {/* 🔐 Password Rule Message */}
           {passwordError && (

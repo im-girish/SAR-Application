@@ -24,6 +24,9 @@ const AdminProfilePage = () => {
   const [editMode, setEditMode] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Load admin data on mount
   useEffect(() => {
@@ -40,7 +43,7 @@ const AdminProfilePage = () => {
         }
       } catch (error) {
         console.error("Failed to fetch profile:", error);
-        // Fallback to localStorage if API fails
+        // Fallback to context data if API fails
         if (admin) {
           setFormData({
             email: admin.email || "",
@@ -53,6 +56,13 @@ const AdminProfilePage = () => {
 
     if (admin) {
       fetchProfile();
+    } else {
+      // If no admin, set empty form
+      setFormData({
+        email: "",
+        phone: "",
+        username: "",
+      });
     }
   }, [admin]);
 
@@ -266,16 +276,25 @@ const AdminProfilePage = () => {
                 <label className="block text-xs sm:text-sm font-semibold text-yellow-300 mb-1 sm:mb-2">
                   Current Password
                 </label>
-                <input
-                  type="password"
-                  name="currentPassword"
-                  value={passwordData.currentPassword}
-                  onChange={handlePasswordChange}
-                  required
-                  className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg border border-yellow-500/40 bg-slate-950/85
-                             text-yellow-50 focus:outline-none focus:ring-2 focus:ring-yellow-400/80"
-                  placeholder="Enter your current password"
-                />
+                <div className="relative">
+                  <input
+                    type={showCurrentPassword ? "text" : "password"}
+                    name="currentPassword"
+                    value={passwordData.currentPassword}
+                    onChange={handlePasswordChange}
+                    required
+                    className="w-full px-3 sm:px-4 py-2 pr-10 text-sm sm:text-base rounded-lg border border-yellow-500/40 bg-slate-950/85
+                               text-yellow-50 focus:outline-none focus:ring-2 focus:ring-yellow-400/80"
+                    placeholder="Enter your current password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-yellow-300 hover:text-yellow-100"
+                  >
+                    {showCurrentPassword ? "👁️" : "🔒"}
+                  </button>
+                </div>
               </div>
 
               {/* NEW PASSWORD */}
@@ -283,16 +302,25 @@ const AdminProfilePage = () => {
                 <label className="block text-xs sm:text-sm font-semibold text-yellow-300 mb-1 sm:mb-2">
                   New Password
                 </label>
-                <input
-                  type="password"
-                  name="newPassword"
-                  value={passwordData.newPassword}
-                  onChange={handlePasswordChange}
-                  required
-                  className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg border border-yellow-500/40 bg-slate-950/85
-                             text-yellow-50 focus:outline-none focus:ring-2 focus:ring-yellow-400/80"
-                  placeholder="Enter new password (min 8 characters)"
-                />
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    name="newPassword"
+                    value={passwordData.newPassword}
+                    onChange={handlePasswordChange}
+                    required
+                    className="w-full px-3 sm:px-4 py-2 pr-10 text-sm sm:text-base rounded-lg border border-yellow-500/40 bg-slate-950/85
+                               text-yellow-50 focus:outline-none focus:ring-2 focus:ring-yellow-400/80"
+                    placeholder="Enter new password (min 8 characters)"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-yellow-300 hover:text-yellow-100"
+                  >
+                    {showNewPassword ? "👁️" : "🔒"}
+                  </button>
+                </div>
               </div>
 
               {/* CONFIRM PASSWORD */}
@@ -300,16 +328,25 @@ const AdminProfilePage = () => {
                 <label className="block text-xs sm:text-sm font-semibold text-yellow-300 mb-1 sm:mb-2">
                   Confirm New Password
                 </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={passwordData.confirmPassword}
-                  onChange={handlePasswordChange}
-                  required
-                  className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg border border-yellow-500/40 bg-slate-950/85
-                             text-yellow-50 focus:outline-none focus:ring-2 focus:ring-yellow-400/80"
-                  placeholder="Confirm new password"
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={passwordData.confirmPassword}
+                    onChange={handlePasswordChange}
+                    required
+                    className="w-full px-3 sm:px-4 py-2 pr-10 text-sm sm:text-base rounded-lg border border-yellow-500/40 bg-slate-950/85
+                               text-yellow-50 focus:outline-none focus:ring-2 focus:ring-yellow-400/80"
+                    placeholder="Confirm new password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-yellow-300 hover:text-yellow-100"
+                  >
+                    {showConfirmPassword ? "👁️" : "🔒"}
+                  </button>
+                </div>
               </div>
 
               {/* BUTTONS */}
