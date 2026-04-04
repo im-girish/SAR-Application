@@ -13,10 +13,31 @@ const PublicNewsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("");
+  const [filteredNews, setFilteredNews] = useState([]);
 
   useEffect(() => {
     fetchNews(activeTab);
   }, [activeTab]);
+
+  // Filter news based on active tab
+  useEffect(() => {
+    let filtered = news;
+
+    if (activeTab === "tribute") {
+      // Show only tribute and achievement type articles
+      filtered = news.filter((item) => {
+        return item.type === "tribute" || item.type === "achievement" || item.type === "award";
+      });
+    } else if (activeTab === "india") {
+      // All India military news (already filtered by backend)
+      filtered = news;
+    } else {
+      // All military news
+      filtered = news;
+    }
+
+    setFilteredNews(filtered);
+  }, [news, activeTab]);
 
   const fetchNews = async (category) => {
     setLoading(true);
@@ -109,13 +130,28 @@ const PublicNewsPage = () => {
       {/* NEWS LIST */}
       {!loading && (
         <div className="glass-card p-6">
-          {news.length === 0 ? (
+          {/* Header with count */}
+          {filteredNews.length > 0 && (
+            <div className="mb-4 pb-4 border-b border-emerald-500/40">
+              <p className="text-sm text-emerald-200">
+                {activeTab === "tribute"
+                  ? `🪖 Showing ${filteredNews.length} military tribute(s) and achievement(s)`
+                  : activeTab === "india"
+                    ? `🇮🇳 Showing ${filteredNews.length} India military news`
+                    : `📰 Showing ${filteredNews.length} military news`}
+              </p>
+            </div>
+          )}
+
+          {filteredNews.length === 0 ? (
             <div className="text-center py-8 text-emerald-100/80">
-              No news available.
+              {activeTab === "tribute"
+                ? "🔍 No military tributes or achievements found. Try checking 'All News' tab."
+                : "🔍 No military news available."}
             </div>
           ) : (
             <div className="space-y-5">
-              {news.map((item, index) => (
+              {filteredNews.map((item, index) => (
                 <article
                   key={index}
                   className="rounded-2xl border border-emerald-500/40 bg-slate-950/85 px-5 py-4"

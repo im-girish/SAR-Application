@@ -108,24 +108,40 @@ export const getMilitaryNews = async (req, res) => {
     });
 
     // =====================================================
-    // 🔥 TRIBUTE FILTER
+    // 🔥 TRIBUTE FILTER - STRICT MILITARY ONLY
     // =====================================================
     if (category === "tribute") {
       const tributeKeywords = [
         "martyr",
         "tribute",
         "death anniversary",
-        "killed",
+        "killed in action",
+        "kia",
         "war hero",
         "bravery",
-        "award",
+        "param vir chakra",
+        "ashoka chakra",
         "gallantry",
         "honor",
+        "heroic",
+        "armed forces",
+        "military award",
+        "soldier",
+        "army",
       ];
 
       uniqueResults = uniqueResults.filter((article) => {
         const text = `${article.title} ${article.description}`.toLowerCase();
-        return tributeKeywords.some((word) => text.includes(word));
+        // Must contain at least one tribute keyword AND be military-related
+        const hasTributeKeyword = tributeKeywords.some((word) =>
+          text.includes(word),
+        );
+        const isMilitaryContext =
+          text.includes("army") ||
+          text.includes("soldier") ||
+          text.includes("military") ||
+          text.includes("armed");
+        return hasTributeKeyword && isMilitaryContext;
       });
     }
 
@@ -140,6 +156,27 @@ export const getMilitaryNews = async (req, res) => {
     }
 
     // =====================================================
+    // 🔥 EXCLUDE NON-MILITARY SECTORS
+    // =====================================================
+    const nonMilitarySectors = [
+      "cricket",
+      "bollywood",
+      "sports",
+      "actor",
+      "celebrity",
+      "film",
+      "sports person",
+      "athlete",
+      "match",
+      "tournament",
+    ];
+
+    uniqueResults = uniqueResults.filter((article) => {
+      const text = `${article.title} ${article.description}`.toLowerCase();
+      return !nonMilitarySectors.some((sector) => text.includes(sector));
+    });
+
+    // =====================================================
     // 🔥 SMART CLASSIFICATION
     // =====================================================
     const classifiedResults = uniqueResults.map((article) => {
@@ -151,27 +188,37 @@ export const getMilitaryNews = async (req, res) => {
       if (
         text.includes("martyr") ||
         text.includes("tribute") ||
-        text.includes("death")
+        text.includes("death anniversary") ||
+        text.includes("kia") ||
+        text.includes("killed in action") ||
+        text.includes("war hero")
       ) {
         type = "tribute";
       }
 
-      // 🎖 Awards
+      // 🎖 Awards - Military specific awards only
       else if (
-        text.includes("chakra") ||
-        text.includes("award") ||
-        text.includes("gallantry")
+        text.includes("param vir chakra") ||
+        text.includes("ashoka chakra") ||
+        text.includes("vir chakra") ||
+        text.includes("military award") ||
+        text.includes("gallantry award") ||
+        (text.includes("award") &&
+          (text.includes("army") || text.includes("soldier")))
       ) {
         type = "award";
       }
 
-      // 🚀 Military Achievements ONLY
+      // 🚀 Military Achievements ONLY - No civilian tech
       else if (
-        text.includes("missile") ||
-        text.includes("drdo") ||
-        text.includes("military exercise") ||
+        text.includes("missile test") ||
         text.includes("fighter jet") ||
-        text.includes("defence success")
+        text.includes("military exercise") ||
+        text.includes("drdo missile") ||
+        text.includes("defence success") ||
+        text.includes("air force operation") ||
+        text.includes("navy operation") ||
+        text.includes("armoured division")
       ) {
         type = "achievement";
       }
