@@ -5,8 +5,18 @@ import config from "../config/env.js";
 const twilioClient = twilio(config.twilio.accountSid, config.twilio.authToken);
 
 // Initialize Nodemailer transporter
+// const emailTransporter = nodemailer.createTransport({
+//   service: config.email.service,
+//   auth: {
+//     user: config.email.user,
+//     pass: config.email.password,
+//   },
+// });
+// ✅ FIXED (production-safe)
 const emailTransporter = nodemailer.createTransport({
-  service: config.email.service,
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true, // true for 465
   auth: {
     user: config.email.user,
     pass: config.email.password,
@@ -31,7 +41,7 @@ const otpStore = new Map();
 export const sendOtpViaSms = async (phoneNumber) => {
   try {
     console.log("📱 Sending OTP via SMS to:", phoneNumber);
-    
+
     const verification = await twilioClient.verify.v2
       .services(config.twilio.verifyServiceSid)
       .verifications.create({ to: phoneNumber, channel: "sms" });
@@ -50,7 +60,7 @@ export const sendOtpViaSms = async (phoneNumber) => {
 export const sendOtpViaEmail = async (email) => {
   try {
     console.log("📧 Sending OTP via Email to:", email);
-    
+
     const otp = generateOtp();
     otpStore.set(email, { otp, expiresAt: Date.now() + 10 * 60 * 1000 }); // 10 min expiry
 
@@ -73,11 +83,14 @@ export const sendOtpViaEmail = async (email) => {
       `,
     };
 
+    // await emailTransporter.sendMail(mailOptions);
+    await emailTransporter.verify(); // 👈 ADD THIS LINE
     await emailTransporter.sendMail(mailOptions);
     console.log("✅ OTP sent via Email");
     return { success: true, method: "email", otp };
   } catch (error) {
-    console.error("❌ Email OTP Error:", error.message);
+    // console.error("❌ Email OTP Error:", error.message);
+    console.error("❌ FULL Email OTP Error:", error);
     return { success: false, error: error.message };
   }
 };
@@ -117,7 +130,7 @@ export const verifyOtpViaSms = async (phoneNumber, code) => {
 export const verifyOtpViaEmail = async (email, code) => {
   try {
     const stored = otpStore.get(email);
-    
+
     if (!stored) {
       return { success: false, error: "OTP expired or not found" };
     }
@@ -148,4 +161,3 @@ export const verifyOtp = async (phoneOrEmail, code, method = "sms") => {
   }
   return verifyOtpViaSms(phoneOrEmail, code);
 };
-
