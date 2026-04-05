@@ -386,8 +386,17 @@ const VehicleForm = ({ vehicle, onSave, onCancel }) => {
                 >
                   <option value="tank">Tank</option>
                   <option value="truck">Truck</option>
-                  <option value="ship">Ship</option>
+                  <option value="armored_vehicle">Armored Vehicle</option>
+                  <option value="infantry_fighting_vehicle">
+                    Infantry Fighting Vehicle
+                  </option>
                   <option value="aircraft">Aircraft</option>
+                  <option value="helicopter">Helicopter</option>
+                  <option value="drone">Drone</option>
+                  <option value="ship">Ship</option>
+                  <option value="aircraft_carrier">Aircraft Carrier</option>
+                  <option value="frigate">Frigate</option>
+                  <option value="submarine">Submarine</option>
                   <option value="other">Other</option>
                 </select>
               </div>

@@ -7,6 +7,21 @@ const LIMIT_OPTIONS = [
   { value: "weak10", label: "Weak 10" },
   { value: "all", label: "All" },
 ];
+const TYPES = [
+  "all",
+  "tank",
+  "truck",
+  "armored_vehicle",
+  "infantry_fighting_vehicle",
+  "aircraft",
+  "helicopter",
+  "drone",
+  "ship",
+  "aircraft_carrier",
+  "frigate",
+  "submarine",
+  "other",
+];
 
 const VehicleList = ({
   vehicles,
@@ -19,11 +34,13 @@ const VehicleList = ({
   const [typeFilter, setTypeFilter] = useState("all");
   const [limitMode, setLimitMode] = useState("top10");
 
+  const normalize = (str) => str?.toLowerCase().replace(/[\s_-]+/g, "_");
+
   const grouped = useMemo(() => {
     let data = [...vehicles];
 
     if (typeFilter !== "all") {
-      data = data.filter((v) => v.type === typeFilter);
+      data = data.filter((v) => normalize(v.type) === normalize(typeFilter));
     }
 
     if (countryQuery.trim()) {
@@ -99,7 +116,7 @@ const VehicleList = ({
           </div>
 
           <div className="flex flex-wrap gap-1.5 text-[0.68rem]">
-            {["all", "tank", "truck", "ship", "aircraft", "other"].map((t) => (
+            {TYPES.map((t) => (
               <button
                 key={t}
                 type="button"
@@ -110,7 +127,11 @@ const VehicleList = ({
                     : "bg-slate-900 border-emerald-500/40 text-emerald-200 hover:bg-emerald-500/15"
                 }`}
               >
-                {t === "all" ? "All" : t.charAt(0).toUpperCase() + t.slice(1)}
+                {t === "all"
+                  ? "All"
+                  : t
+                      .replace(/_/g, " ")
+                      .replace(/\b\w/g, (c) => c.toUpperCase())}
               </button>
             ))}
           </div>
@@ -159,10 +180,10 @@ const VehicleList = ({
                     {category === "ground"
                       ? "Ground Forces"
                       : category === "air"
-                      ? "Air Assets"
-                      : category === "naval"
-                      ? "Artillery & AD"
-                      : "Logistics & Support"}
+                        ? "Air Assets"
+                        : category === "naval"
+                          ? "Artillery & AD"
+                          : "Logistics & Support"}
                   </h4>
                   <p className="text-xs text-emerald-200/80">
                     {list.length} unit{list.length > 1 ? "s" : ""} in view
