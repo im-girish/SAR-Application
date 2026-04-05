@@ -5,23 +5,23 @@ import config from "../config/env.js";
 const twilioClient = twilio(config.twilio.accountSid, config.twilio.authToken);
 
 // Initialize Nodemailer transporter
-// const emailTransporter = nodemailer.createTransport({
-//   service: config.email.service,
-//   auth: {
-//     user: config.email.user,
-//     pass: config.email.password,
-//   },
-// });
-// ✅ FIXED (production-safe)
 const emailTransporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true, // true for 465
+  service: config.email.service,
   auth: {
     user: config.email.user,
     pass: config.email.password,
   },
 });
+// ✅ FIXED (production-safe)
+// const emailTransporter = nodemailer.createTransport({
+//   host: "smtp.gmail.com",
+//   port: 465,
+//   secure: true, // true for 465
+//   auth: {
+//     user: config.email.user,
+//     pass: config.email.password,
+//   },
+// });
 
 /**
  * Generate a random 6-digit OTP
@@ -84,7 +84,7 @@ export const sendOtpViaEmail = async (email) => {
     };
 
     // await emailTransporter.sendMail(mailOptions);
-    await emailTransporter.verify(); // 👈 ADD THIS LINE
+    // await emailTransporter.verify(); // 👈 ADD THIS LINE
     await emailTransporter.sendMail(mailOptions);
     console.log("✅ OTP sent via Email");
     return { success: true, method: "email", otp };
