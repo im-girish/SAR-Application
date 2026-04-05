@@ -27,7 +27,7 @@ const VehiclesPage = () => {
   }, []);
 
   const goBackToCommandCenter = () => {
-    navigate("/"); // Command Center route
+    navigate("/dashboard"); // Admin Dashboard route
   };
 
   return (
@@ -38,7 +38,7 @@ const VehiclesPage = () => {
         onClick={goBackToCommandCenter}
         className="inline-flex items-center gap-1 rounded-full border border-purple-400/80 bg-purple-700/70 px-4 py-1.5 text-xs font-semibold text-purple-50 shadow-[0_0_20px_rgba(147,51,234,0.9)] hover:bg-purple-500 hover:border-purple-300 hover:shadow-[0_0_26px_rgba(167,139,250,1)] transition"
       >
-        ← Back to Command Center
+        ← Back to Admin Dashboard
       </button>
 
       {/* Read-only vehicles table */}
