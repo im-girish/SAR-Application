@@ -35,6 +35,7 @@ const VehicleList = ({
   const [limitMode, setLimitMode] = useState("top10");
 
   const normalize = (str) => str?.toLowerCase().replace(/[\s_-]+/g, "_");
+  const getNumber = (val) => parseInt(val) || 0;
 
   const grouped = useMemo(() => {
     let data = [...vehicles];
@@ -46,6 +47,21 @@ const VehicleList = ({
     if (countryQuery.trim()) {
       const q = countryQuery.toLowerCase();
       data = data.filter((v) => v.country?.toLowerCase().includes(q));
+    }
+    // ✅ ADD HERE (IMPORTANT)
+    if (limitMode.includes("top") || limitMode.includes("weak")) {
+      data.sort((a, b) => {
+        const speedA = getNumber(a.specifications?.speed);
+        const speedB = getNumber(b.specifications?.speed);
+
+        const rangeA = getNumber(a.specifications?.range);
+        const rangeB = getNumber(b.specifications?.range);
+
+        const scoreA = speedA + rangeA;
+        const scoreB = speedB + rangeB;
+
+        return scoreB - scoreA; // descending
+      });
     }
 
     const applyLimit = (arr) => {
