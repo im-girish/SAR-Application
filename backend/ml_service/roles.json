@@ -1,27 +1,31 @@
 {
   "BMP2": {
-    "type": "Infantry Fighting Vehicle",
-    "threat": "High mobility armored vehicle capable of troop transport and direct fire support.",
-    "harm": "Can cause significant ground damage; neutralizing reduces mechanized infantry capability."
+    "type": "Military fighting vehicle",
+    "threat": "This vehicle carries soldiers and also attacks enemies using heavy weapons.",
+    "harm": "It can help enemy soldiers move safely and fight strongly during battle. Destroying it can reduce enemy attack power."
   },
+
   "T72": {
-    "type": "Main Battle Tank",
-    "threat": "Heavily armored tank equipped with high-caliber cannons.",
-    "harm": "Potential to destroy structures, armored units, and fortifications."
+    "type": "Battle tank",
+    "threat": "A powerful armored tank with a big gun used in war.",
+    "harm": "It can destroy buildings, vehicles, and defense areas very easily. It is one of the most dangerous vehicles in combat."
   },
+
   "BTR70": {
-    "type": "Armored Personnel Carrier",
-    "threat": "Transports troops, offers light firepower and mobility.",
-    "harm": "Neutralizing reduces enemy mobility and deployment speed."
+    "type": "Armored troop vehicle",
+    "threat": "This vehicle is used to carry soldiers safely from one place to another during war.",
+    "harm": "It helps enemy troops travel quickly and safely. Stopping it can slow down enemy movement."
   },
+
   "BMP1": {
-    "type": "Infantry Fighting Vehicle (variant)",
-    "threat": "Armored vehicle for troop transport and support.",
-    "harm": "Can transport infantry into combat and provide fire support."
+    "type": "Military support vehicle",
+    "threat": "An armored vehicle used to carry soldiers and support them in attacks.",
+    "harm": "It helps enemy soldiers enter battle safely and attack targets with weapons."
   },
+
   "UNKNOWN": {
     "type": "Unknown vehicle",
-    "threat": "",
-    "harm": "No information available for this class."
+    "threat": "The system could not recognize this vehicle clearly.",
+    "harm": "No clear information is available because the vehicle type is unknown."
   }
 }

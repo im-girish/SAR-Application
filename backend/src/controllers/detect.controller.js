@@ -7,6 +7,82 @@ import {
 import Admin from "../models/Admin.js";
 import { successResponse, errorResponse } from "../utils/response.util.js";
 
+function inferThreatLevel(name = "") {
+  const label = name.toLowerCase();
+  if (
+    label.includes("tank") ||
+    label.includes("armored") ||
+    label.includes("vehicle")
+  ) {
+    return "High";
+  }
+  if (
+    label.includes("truck") ||
+    label.includes("jeep") ||
+    label.includes("transport")
+  ) {
+    return "Medium";
+  }
+  if (
+    label.includes("aircraft") ||
+    label.includes("helicopter") ||
+    label.includes("drone")
+  ) {
+    return "Critical";
+  }
+  return "Unknown";
+}
+
+function inferImpactLevel(name = "") {
+  const label = name.toLowerCase();
+  if (
+    label.includes("tank") ||
+    label.includes("aircraft") ||
+    label.includes("helicopter")
+  ) {
+    return "Severe";
+  }
+  if (
+    label.includes("truck") ||
+    label.includes("jeep") ||
+    label.includes("vehicle")
+  ) {
+    return "Moderate";
+  }
+  if (label.includes("person") || label.includes("soldier")) {
+    return "Low";
+  }
+  return "Unknown";
+}
+
+function mapPredictionToAlarm(prediction = {}) {
+  const name =
+    prediction.class ||
+    prediction.label ||
+    prediction.name ||
+    "Unknown vehicle";
+  const confidence = Number(prediction.confidence ?? prediction.score ?? 0);
+  const type = prediction.type || "Vehicle";
+  const threat =
+    prediction.threat || prediction.Threat || inferThreatLevel(name);
+  const impact = prediction.impact || prediction.harm || inferImpactLevel(name);
+  const alarmType =
+    confidence >= 0.5
+      ? "Enemy army vehicle detected"
+      : "Possible enemy vehicle detected";
+
+  return {
+    ...prediction,
+    alarmType,
+    name,
+    type,
+    threat,
+    impact,
+    confidence,
+    message: `${alarmType}: ${name}. Impact: ${impact}. Threat: ${threat}.`,
+  };
+}
+
 /**
  * POST /api/ml
  * Expects multipart/form-data with field 'file'
@@ -23,14 +99,36 @@ export async function detectHandler(req, res) {
     // if (!req.file.mimetype.startsWith("image/")) { ... }
 
     // Send file buffer to ML service
-    const result = await detectFromBuffer(
+    const rawResult = await detectFromBuffer(
       req.file.buffer,
       req.file.originalname,
     );
 
+    const predictions = Array.isArray(rawResult.predictions)
+      ? rawResult.predictions
+      : Array.isArray(rawResult.detections)
+        ? rawResult.detections
+        : [];
+
+    const enrichedPredictions = predictions.map(mapPredictionToAlarm);
+
+    const responsePayload = {
+      ...rawResult,
+      predictions: enrichedPredictions,
+      alerts: enrichedPredictions.map((item) => ({
+        alarmType: item.alarmType,
+        name: item.name,
+        type: item.type,
+        threat: item.threat,
+        impact: item.impact,
+        confidence: item.confidence,
+        bbox: item.bbox,
+      })),
+    };
+
     // Optionally: store result in DB (detection logs). Add your DB logic here.
 
-    return res.json({ success: true, data: result });
+    return res.json({ success: true, data: responsePayload });
   } catch (err) {
     console.error(
       "detectHandler error:",

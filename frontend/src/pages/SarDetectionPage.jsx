@@ -21,6 +21,72 @@ const SarDetectionPage = () => {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
   const [detectionAttempted, setDetectionAttempted] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  const [speechPaused, setSpeechPaused] = useState(false);
+  const [currentMessage, setCurrentMessage] = useState("");
+
+  const handleStopAlarm = () => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+
+    if (speechPaused) {
+      window.speechSynthesis.resume();
+      setSpeechPaused(false);
+    } else if (speaking) {
+      window.speechSynthesis.pause();
+      setSpeechPaused(true);
+    }
+  };
+
+  const speakAlarm = (results) => {
+    if (!Array.isArray(results)) return;
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+
+    if (results.length === 0) {
+      speakMessage(
+        "Warning. Unknown target detected. No known vehicle identified.",
+      );
+      return;
+    }
+
+    const detailText = results
+      .map((r, index) => {
+        const vehicleName = r.name || r.class || "unknown vehicle";
+        const threat = r.threat || "unknown threat";
+        const impact = r.impact || r.harm || "unknown impact";
+        return `Target ${index + 1}: ${vehicleName}. Threat level ${threat}. Impact ${impact}.`;
+      })
+      .join(" ");
+
+    speakMessage(
+      `Alarm. Enemy army vehicle detected. ${results.length} target${results.length > 1 ? 's' : ''} found. ${detailText}`,
+    );
+  };
+
+  const speakMessage = (message) => {
+    if (typeof window === "undefined" || !window.speechSynthesis || !message)
+      return;
+
+    setCurrentMessage(message);
+    const utterance = new SpeechSynthesisUtterance(message);
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    utterance.lang = "en-US";
+    utterance.onstart = () => {
+      setSpeaking(true);
+      setSpeechPaused(false);
+    };
+    utterance.onend = () => {
+      setSpeaking(false);
+      setSpeechPaused(false);
+    };
+    utterance.onerror = () => {
+      setSpeaking(false);
+      setSpeechPaused(false);
+    };
+
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  };
 
   /* ================= DRAW GRID BBOX ================= */
   useEffect(() => {
@@ -104,6 +170,32 @@ const SarDetectionPage = () => {
     toast.success(`📸 ${newFiles.length} image(s) uploaded`);
   };
 
+  /* ================= REMOVE SINGLE IMAGE ================= */
+  const handleRemoveImage = (idxToRemove) => {
+    const newFiles = files.filter((_, idx) => idx !== idxToRemove);
+    const newUrls = imageUrls.filter((_, idx) => idx !== idxToRemove);
+    const newResults = { ...allResults };
+    delete newResults[imageUrls[idxToRemove]];
+    const newDetected = new Set(
+      Array.from(detectedImages).filter(
+        (url) => !url.includes(imageUrls[idxToRemove]),
+      ),
+    );
+
+    setFiles(newFiles);
+    setImageUrls(newUrls);
+    setAllResults(newResults);
+    setDetectedImages(newDetected);
+
+    if (currentImageIndex >= newFiles.length && currentImageIndex > 0) {
+      setCurrentImageIndex(currentImageIndex - 1);
+    } else if (currentImageIndex >= newFiles.length) {
+      setCurrentImageIndex(0);
+    }
+
+    toast.info(`🗑️ Image removed`);
+  };
+
   /* ================= API ================= */
   const handleDetect = async () => {
     if (files.length === 0) {
@@ -132,6 +224,12 @@ const SarDetectionPage = () => {
       setAllResults(newResults);
       setDetectedImages(detected);
       setDetectionAttempted(true);
+
+      const firstImageKey = imageUrls[0];
+      const firstImageResults = newResults[firstImageKey] || [];
+      // Always call speakAlarm - it handles both detected and unknown targets
+      speakAlarm(firstImageResults);
+
       toast.success(`✅ Detection completed for ${files.length} image(s)!`);
     } catch (error) {
       toast.error("❌ Detection failed. Please try again.");
@@ -273,22 +371,33 @@ const SarDetectionPage = () => {
                 {files.map((f, idx) => {
                   const isDetected = detectedImages.has(imageUrls[idx]);
                   return (
-                    <button
-                      key={idx}
-                      onClick={() => setCurrentImageIndex(idx)}
-                      className={`w-full text-left px-2 py-1 rounded text-xs truncate transition flex items-center gap-2 ${
-                        currentImageIndex === idx
-                          ? "bg-lime-500/40 text-lime-200 font-semibold"
-                          : "bg-slate-800 text-emerald-200 hover:bg-slate-700"
-                      }`}
-                    >
-                      <span className="flex-shrink-0 w-4">
-                        {isDetected ? "✅" : "⏳"}
-                      </span>
-                      <span>
-                        {idx + 1}. {f.name}
-                      </span>
-                    </button>
+                    <div key={idx} className="flex items-center gap-2">
+                      <button
+                        onClick={() => setCurrentImageIndex(idx)}
+                        className={`flex-1 text-left px-2 py-1 rounded text-xs truncate transition flex items-center gap-2 ${
+                          currentImageIndex === idx
+                            ? "bg-lime-500/40 text-lime-200 font-semibold"
+                            : "bg-slate-800 text-emerald-200 hover:bg-slate-700"
+                        }`}
+                      >
+                        <span className="shrink-0 w-4">
+                          {isDetected ? "✅" : "⏳"}
+                        </span>
+                        <span>
+                          {idx + 1}. {f.name}
+                        </span>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveImage(idx);
+                        }}
+                        className="shrink-0 px-2 py-1 rounded bg-red-600/60 hover:bg-red-500 text-red-100 text-xs font-bold transition"
+                        title="Remove image"
+                      >
+                        ✕
+                      </button>
+                    </div>
                   );
                 })}
               </div>
@@ -406,7 +515,8 @@ const SarDetectionPage = () => {
             {results.length > 0 && (
               <div className="glass-card p-4 sm:p-6 border border-yellow-500/50 bg-yellow-950/20">
                 <h3 className="text-yellow-300 font-bold mb-3 sm:mb-4 text-sm sm:text-base">
-                  📋 Report Actions (Image {currentImageIndex + 1}/{imageUrls.length})
+                  📋 Report Actions (Image {currentImageIndex + 1}/
+                  {imageUrls.length})
                 </h3>
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                   {/* Download PDF Button */}
@@ -428,14 +538,40 @@ const SarDetectionPage = () => {
                   >
                     {emailLoading ? "🔄 Sending..." : "✉️ Send Report"}
                   </button>
+
+                  {/* Stop/Resume Voice Alarm Button */}
+                  <button
+                    onClick={handleStopAlarm}
+                    disabled={!speaking && !speechPaused}
+                    className="flex-1 px-4 sm:px-6 py-2 sm:py-3 rounded-lg bg-red-600 hover:bg-red-500 font-semibold text-white text-xs sm:text-sm
+                               shadow-[0_0_15px_rgba(220,38,38,0.6)] disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {speechPaused ? "▶️ Resume" : "⏸️ Pause"}
+                  </button>
                 </div>
                 <p className="text-xs sm:text-sm text-emerald-200 mt-3">
-                  💡 Download or send this image's detection report to admin email
+                  💡 Download or send this image's detection report to admin
+                  email
                 </p>
               </div>
             )}
 
             {/* DETECTED TARGETS */}
+            {results.length > 0 && (
+              <div className="glass-card p-4 sm:p-6 border border-red-500/40 bg-red-950/10 mb-4">
+                <h3 className="text-base sm:text-lg text-red-300 font-bold mb-2">
+                  ⚠️ Alarm Summary
+                </h3>
+                <p className="text-emerald-200 text-xs sm:text-sm mb-1">
+                  {results.length} vehicle(s) detected.
+                </p>
+                <p className="text-emerald-200 text-xs sm:text-sm">
+                  {results[0].message ||
+                    `${results[0].alarmType || "Enemy vehicle detected"}: ${results[0].name || results[0].class}`}
+                </p>
+              </div>
+            )}
+
             {results.map((r, i) => (
               <div
                 key={i}
@@ -443,11 +579,16 @@ const SarDetectionPage = () => {
                            shadow-[0_0_25px_rgba(132,204,22,0.25)]"
               >
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4">
-                  <h3 className="text-lg sm:text-xl text-lime-300">
-                    Target: {r.class}
-                  </h3>
+                  <div>
+                    <h3 className="text-lg sm:text-xl text-lime-300">
+                      Alarm: {r.alarmType || "Enemy vehicle detected"}
+                    </h3>
+                    <p className="text-emerald-200 text-xs sm:text-sm mt-1">
+                      <strong>Vehicle:</strong> {r.name || r.class}
+                    </p>
+                  </div>
                   <span className="px-4 py-1 rounded-full bg-lime-500/20 text-lime-300 text-xs sm:text-sm whitespace-nowrap">
-                    Confidence: {r.confidence.toFixed(3)}
+                    Confidence: {Number(r.confidence || 0).toFixed(3)}
                   </span>
                 </div>
                 {/* TYPE */}
@@ -458,7 +599,7 @@ const SarDetectionPage = () => {
                   <b>Threat:</b> {r.threat}
                 </p>
                 <p className="text-emerald-200 text-xs sm:text-sm">
-                  <b>Impact:</b> {r.harm}
+                  <b>Impact:</b> {r.impact || r.harm}
                 </p>
               </div>
             ))}

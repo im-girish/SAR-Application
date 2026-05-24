@@ -15,7 +15,10 @@ const emailTransporter = nodemailer.createTransport({
  * Generate PDF report for detection results
  * Returns a Buffer containing the PDF data
  */
-export const generateDetectionPdf = async (detectionData, fileName = "detection_report.pdf") => {
+export const generateDetectionPdf = async (
+  detectionData,
+  fileName = "detection_report.pdf",
+) => {
   return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument({
@@ -33,7 +36,10 @@ export const generateDetectionPdf = async (detectionData, fileName = "detection_
       });
 
       // Title
-      doc.fontSize(20).font("Helvetica-Bold").text("SAR Detection Report", { align: "center" });
+      doc
+        .fontSize(20)
+        .font("Helvetica-Bold")
+        .text("SAR Detection Report", { align: "center" });
       doc.moveDown(0.5);
 
       // Report Metadata
@@ -43,17 +49,30 @@ export const generateDetectionPdf = async (detectionData, fileName = "detection_
       doc.moveDown(1);
 
       // Image Information
-      doc.fontSize(12).font("Helvetica-Bold").fillColor("#000000").text("Image Information");
+      doc
+        .fontSize(12)
+        .font("Helvetica-Bold")
+        .fillColor("#000000")
+        .text("Image Information");
       doc.fontSize(10).font("Helvetica").fillColor("#333333");
       doc.text(`File Name: ${detectionData.fileName || "Unknown"}`);
-      doc.text(`Upload Time: ${detectionData.uploadTime || new Date().toLocaleString()}`);
+      doc.text(
+        `Upload Time: ${detectionData.uploadTime || new Date().toLocaleString()}`,
+      );
       doc.moveDown(1);
 
       // Detection Results
-      doc.fontSize(12).font("Helvetica-Bold").fillColor("#000000").text("Detection Results");
+      doc
+        .fontSize(12)
+        .font("Helvetica-Bold")
+        .fillColor("#000000")
+        .text("Detection Results");
       doc.moveDown(0.3);
 
-      if (!detectionData.predictions || detectionData.predictions.length === 0) {
+      if (
+        !detectionData.predictions ||
+        detectionData.predictions.length === 0
+      ) {
         doc.fontSize(10).font("Helvetica").fillColor("#999999");
         doc.text("No targets detected in this image.", { indent: 20 });
       } else {
@@ -62,16 +81,28 @@ export const generateDetectionPdf = async (detectionData, fileName = "detection_
           doc.text(`Detection ${index + 1}:`, { indent: 20 });
 
           doc.fontSize(9).font("Helvetica").fillColor("#333333");
-          doc.text(`Target Class: ${detection.class || "Unknown"}`, { indent: 40 });
-          doc.text(`Confidence: ${(detection.confidence * 100).toFixed(2)}%`, { indent: 40 });
+          doc.text(
+            `Target Class: ${detection.name || detection.class || "Unknown"}`,
+            { indent: 40 },
+          );
+          doc.text(`Alarm: ${detection.alarmType || "Vehicle detected"}`, {
+            indent: 40,
+          });
+          doc.text(`Confidence: ${(detection.confidence * 100).toFixed(2)}%`, {
+            indent: 40,
+          });
           doc.text(`Type: ${detection.type || "N/A"}`, { indent: 40 });
-          doc.text(`Threat Level: ${detection.threat || "N/A"}`, { indent: 40 });
-          doc.text(`Impact: ${detection.harm || "N/A"}`, { indent: 40 });
+          doc.text(`Threat Level: ${detection.threat || "N/A"}`, {
+            indent: 40,
+          });
+          doc.text(`Impact: ${detection.impact || detection.harm || "N/A"}`, {
+            indent: 40,
+          });
 
           if (detection.bbox) {
             doc.text(
               `Bounding Box: [${detection.bbox.map((v) => v.toFixed(2)).join(", ")}]`,
-              { indent: 40 }
+              { indent: 40 },
             );
           }
 
@@ -82,18 +113,23 @@ export const generateDetectionPdf = async (detectionData, fileName = "detection_
       doc.moveDown(1);
 
       // Summary
-      doc.fontSize(12).font("Helvetica-Bold").fillColor("#000000").text("Summary");
+      doc
+        .fontSize(12)
+        .font("Helvetica-Bold")
+        .fillColor("#000000")
+        .text("Summary");
       doc.fontSize(10).font("Helvetica").fillColor("#333333");
-      doc.text(
-        `Total Detections: ${detectionData.predictions?.length || 0}`,
-        { indent: 20 }
-      );
+      doc.text(`Total Detections: ${detectionData.predictions?.length || 0}`, {
+        indent: 20,
+      });
 
       const avgConfidence =
         detectionData.predictions && detectionData.predictions.length > 0
           ? (
-              detectionData.predictions.reduce((sum, d) => sum + d.confidence, 0) /
-              detectionData.predictions.length
+              detectionData.predictions.reduce(
+                (sum, d) => sum + d.confidence,
+                0,
+              ) / detectionData.predictions.length
             ).toFixed(3)
           : "N/A";
 
@@ -102,10 +138,15 @@ export const generateDetectionPdf = async (detectionData, fileName = "detection_
 
       // Footer
       doc.fontSize(8).font("Helvetica").fillColor("#999999");
-      doc.text("This report is automatically generated by SAR Detection System", {
+      doc.text(
+        "This report is automatically generated by SAR Detection System Agent Giri",
+        {
+          align: "center",
+        },
+      );
+      doc.text("Confidential - For Authorized Personnel Only", {
         align: "center",
       });
-      doc.text("Confidential - For Authorized Personnel Only", { align: "center" });
 
       doc.end();
     } catch (error) {
@@ -118,7 +159,11 @@ export const generateDetectionPdf = async (detectionData, fileName = "detection_
 /**
  * Send detection report via email
  */
-export const sendDetectionReportEmail = async (recipientEmail, detectionData, pdfBuffer) => {
+export const sendDetectionReportEmail = async (
+  recipientEmail,
+  detectionData,
+  pdfBuffer,
+) => {
   try {
     console.log("📧 Sending detection report to:", recipientEmail);
 
@@ -164,9 +209,8 @@ export const sendDetectionReportEmail = async (recipientEmail, detectionData, pd
                   .map(
                     (d) =>
                       `<li style="margin: 8px 0; color: #555;">
-                      <strong>${d.class}</strong> - Confidence: ${(d.confidence * 100).toFixed(1)}%, 
-                      Threat: ${d.threat || "N/A"}
-                    </li>`
+                      <strong>${d.name || d.class || "Unknown vehicle"}</strong> - ${d.alarmType || "Vehicle detected"}, Confidence: ${(d.confidence * 100).toFixed(1)}%, Threat: ${d.threat || "N/A"}, Impact: ${d.impact || d.harm || "N/A"}
+                    </li>`,
                   )
                   .join("")}
               </ul>
